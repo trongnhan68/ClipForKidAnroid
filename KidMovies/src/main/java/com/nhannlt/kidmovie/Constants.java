@@ -26,4 +26,7 @@ public class Constants {
     // playlist ID for the app to work
     public static final String UPLOAD_PLAYLIST = "PLzB9NRNjGRgxH9c97gFLdUgE0Cpg8qXEr";
     public static final String APP_NAME = "Be Xem TiVi";
+    public static final int tab_music=1;
+    public static final int tab_story=2;
+    public static final int tab_cartoon=3;
 }

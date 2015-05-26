@@ -6,34 +6,7 @@
     android:orientation="vertical"
     android:background="@android:color/black"
     android:showDividers="middle">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
 
-    android:gravity="center_horizontal"
-    android:orientation="horizontal">
-<ImageButton
-    android:id="@+id/btn_music"
-    android:background="@drawable/theloai_amnhac"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-
-    ></ImageButton>
-    <ImageButton
-        android:id="@+id/btn_funny"
-        android:background="@drawable/theloai_kechuyen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        ></ImageButton>
-    <ImageButton
-        android:id="@+id/btn_cartoon"
-        android:background="@drawable/theloai_hoathinh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        ></ImageButton>
-</LinearLayout>
    
 
 

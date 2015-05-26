@@ -19,7 +19,34 @@
         android:orientation="vertical"
         android:showDividers="middle"
         android:verticalSpacing="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/black"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/btn_music"
+                android:background="@drawable/en_music"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
 
+                ></ImageButton>
+            <ImageButton
+                android:id="@+id/btn_funny"
+                android:background="@drawable/en_story_select"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                ></ImageButton>
+            <ImageButton
+                android:id="@+id/btn_cartoon"
+                android:background="@drawable/en_cartoon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                ></ImageButton>
+        </LinearLayout>
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -69,7 +96,7 @@
                 android:id="@+id/imgBtn_thuvien"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/thuvien"
+                android:background="@drawable/list"
 
                 android:layout_marginLeft="10dp" />
 

@@ -181,21 +181,14 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
   public  void SetViewInvisible ()
   {
 
-      getView().setVisibility(View.INVISIBLE);
-
-     // getView().setAlpha(1.0f);
-
-// Start the animation
+      //getView().setVisibility(View.INVISIBLE);
       getView().animate()
-              .translationY(getView().getHeight());
+              .translationY(-getView().getHeight());
   }
     public  void SetViewVisible ()
     {
 
-        getView().setVisibility(View.VISIBLE);
-      //  getView().setAlpha(0.0f);
-
-// Start the animation
+        //getView().setVisibility(View.VISIBLE);
         getView().animate()
                 .translationY(0);
 
