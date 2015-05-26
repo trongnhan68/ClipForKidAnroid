@@ -1,0 +1,64 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:divider="?android:dividerHorizontal"
+    android:dividerPadding="16dp"
+    android:orientation="vertical"
+    android:background="@android:color/black"
+    android:showDividers="middle">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:gravity="center_horizontal"
+    android:orientation="horizontal">
+<ImageButton
+    android:id="@+id/btn_music"
+    android:background="@drawable/theloai_amnhac"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    ></ImageButton>
+    <ImageButton
+        android:id="@+id/btn_funny"
+        android:background="@drawable/theloai_kechuyen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        ></ImageButton>
+    <ImageButton
+        android:id="@+id/btn_cartoon"
+        android:background="@drawable/theloai_hoathinh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        ></ImageButton>
+</LinearLayout>
+   
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <GridView
+            android:id="@+id/grid_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:fastScrollEnabled="true"
+            android:numColumns="auto_fit" />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="@string/no_videos_to_show_here_" />
+    </FrameLayout>
+
+
+
+</LinearLayout>
