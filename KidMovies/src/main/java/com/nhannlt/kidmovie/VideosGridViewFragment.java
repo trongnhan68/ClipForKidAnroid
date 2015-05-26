@@ -182,7 +182,24 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
   {
 
       getView().setVisibility(View.INVISIBLE);
+
+     // getView().setAlpha(1.0f);
+
+// Start the animation
+      getView().animate()
+              .translationY(getView().getHeight());
   }
+    public  void SetViewVisible ()
+    {
+
+        getView().setVisibility(View.VISIBLE);
+      //  getView().setAlpha(0.0f);
+
+// Start the animation
+        getView().animate()
+                .translationY(0);
+
+    }
     private class UploadedVideoAdapter extends BaseAdapter {
         private List<VideoData> mVideos;
 

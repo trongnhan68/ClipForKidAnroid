@@ -7,11 +7,12 @@
     android:orientation="horizontal"
     android:showDividers="middle"
     android:background="@drawable/bg"
+
     android:verticalSpacing="10dp">
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="8"
         android:divider="?android:dividerHorizontal"
         android:horizontalSpacing="10dp"
@@ -57,6 +58,7 @@
 
 
         <LinearLayout
+            android:layout_gravity="bottom"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -68,6 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/thuvien"
+
                 android:layout_marginLeft="10dp" />
 
             <TextView
@@ -91,7 +94,7 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="2"
      android:orientation="vertical"
         >

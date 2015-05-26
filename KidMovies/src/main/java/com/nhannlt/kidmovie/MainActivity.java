@@ -38,6 +38,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -127,7 +129,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private VideoData mVideoData;
     private UploadBroadcastReceiver broadcastReceiver;
     private VideosGridViewFragment mVideosGridViewFragment;
-
+    private ImageButton btnList;
+    private ImageButton btnMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -139,6 +142,11 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             showMissingConfigurations();
         } else {
             setContentView(R.layout.activity_main);
+            getActionBar().hide();
+
+           /* LinearLayout.LayoutParams layoutParams =(LinearLayout.LayoutParams) rootView.getLayoutParams();
+            layoutParams.height =  getResources().getDisplayMetrics().heightPixels;*/
+           // rootView.setLayoutParams(layoutParams);
 
             ensureFetcher();
 
@@ -161,6 +169,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
            // new TheTask().execute(BaseURLStringDropBox_1);
           //  getJSON(BaseURLStringDropBox_1);
             new JSONAsyncTask().execute(BaseURLStringDropBox_1);
+            initButton();
+            onClick();
         }
 
     }
@@ -177,7 +187,37 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
      * @return true if the application is correctly configured for use, false if
      * not
      */
+    public void initButton(){
 
+         btnList = (ImageButton) this.findViewById(R.id.imgBtn_thuvien);
+         btnMenu = (ImageButton) this.findViewById(R.id.imgBtn_menu);
+    }
+    public void onClick() {
+         btnList.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
+                 if (!btnList.isSelected()) {
+                     showListVideo();
+                     btnList.setSelected(true);
+                     Log.d("Main Log","Show List View");
+                 } else {
+                     hideListVideo();
+                     btnList.setSelected(false);
+                     Log.d("Main Log","Hide List View");
+
+                 }
+             }
+         });
+
+    }
+    private void showListVideo(){
+
+        mVideosGridViewFragment.SetViewVisible();
+    }
+    private void hideListVideo(){
+
+        mVideosGridViewFragment.SetViewInvisible();
+    }
     public void panToVideo(final String youtubeId) {
         popPlayerFromBackStack();
         YouTubePlayerFragment playerFragment = YouTubePlayerFragment
@@ -291,6 +331,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     @Override
     protected void onResume() {
         super.onResume();
+
         if (broadcastReceiver == null)
             broadcastReceiver = new UploadBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter(
@@ -312,7 +353,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         mChosenAccountName = sp.getString(ACCOUNT_KEY, null);
-        invalidateOptionsMenu();
+        //invalidateOptionsMenu();
     }
 
     private void saveAccount() {
@@ -341,14 +382,14 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         }
     }
 
-    @Override
+   /* @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return super.onCreateOptionsMenu(menu);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
@@ -359,7 +400,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
