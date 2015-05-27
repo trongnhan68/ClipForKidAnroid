@@ -18,8 +18,8 @@ import com.google.android.gms.common.Scopes;
 import com.google.api.services.youtube.YouTubeScopes;
 
 public class Auth {
-    // Register an API key here: https://code.google.com/apis/console
-   public static final String KEY = "AIzaSyBufHMtVb_rBlOPKPkCETC1aGh2JkR03DM";
-  //  public static final String KEY = "1038678827019-ps3q81iivqbapoa1fn9tt09bbvle20ak.apps.googleusercontent.com";
+    // Register an API key here: https://code.google.com/apis/console AIzaSyBufHMtVb_rBlOPKPkCETC1aGh2JkR03DM
+    public static final String KEY = "AIzaSyAqAwSPgadffdfwSDTvrozdBSNf-Kg9piY";
+    //public static final String KEY = "1038678827019-s5ju7hgbp149bjdndos7jf3pjvvftakn.apps.googleusercontent.com";
     public static final String[] SCOPES = {Scopes.PROFILE, YouTubeScopes.YOUTUBE};
 }

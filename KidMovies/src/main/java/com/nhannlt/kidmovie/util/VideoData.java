@@ -56,7 +56,7 @@ public class VideoData {
     }
 
     public String getThumbUri() {
-        return mVideo.getSnippet().getThumbnails().getDefault().getUrl();
+        return mVideo.getSnippet().getThumbnails().getHigh().getUrl();
     }
 
     public String getWatchUri() {

@@ -6,7 +6,7 @@
     android:gravity="center_vertical"
     android:minHeight="?android:listPreferredItemHeightSmall"
     android:orientation="vertical"
-    android:paddingBottom="16dp">
+    android:padding="5dp">
 
     <LinearLayout
         android:id="@+id/main_target"
@@ -16,27 +16,51 @@
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp">
 
-        <ImageView
-            android:id="@+id/thumbnail"
+
+        android:paddingTop="10dp">
+        <FrameLayout
+            android:background="@drawable/bg_loading"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_marginBottom="8dp"
-            android:background="#1000"
-            android:scaleType="centerCrop" />
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@android:id/text1"
-            style="?android:textAppearanceMedium"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-condensed"
-            android:maxLines="2" />
+            <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:background="@drawable/bg_loading"
+                android:scaleType="centerCrop" />
+            <TextView
+                android:id="@+id/txtView_videoDuratiion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_marginBottom="60dp"
+                android:layout_marginRight="5dp"
+                android:textStyle="bold"
+                android:background="@android:color/black"
+                android:textColor="@android:color/white"
+                android:text="2:30" />
+            <TextView
+                android:id="@+id/txtview_videoNameInItem"
+                style="?android:textAppearanceMedium"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center_vertical"
+                android:background="@android:color/black"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/textview_video"
+                android:layout_gravity="left|bottom"
+                android:ellipsize="end"
+                android:text="hihi"
+
+                android:fontFamily="sans-serif-condensed"
+                android:maxLines="1" />
+        </FrameLayout>
+
+
+
 
     </LinearLayout>
 

@@ -74,9 +74,28 @@ public class DBManager {
                     new String[]{videoId});
         }
     }
-    public ArrayList<FavoriteData> loadallVideo() {
+    public FavoriteData loadVideoByID(String videoId) {
         Cursor c = database.query("tblFavorite",
-                null, null, null, null, null, null);
+                null, "videoId=?",
+                new String[]{videoId}, null, null, null);
+        c.moveToFirst();
+        FavoriteData mFavoriteVideo = new FavoriteData();
+
+            FavoriteData mFavoriteData = new FavoriteData();
+            mFavoriteData.setVideoId(c.getString(0));
+            mFavoriteData.setVideoName(c.getString(1));
+            mFavoriteData.setVideoUrl(c.getString(2));
+            mFavoriteData.setVideoDuration(c.getString(3));
+            mFavoriteData.setVideoPosition(c.getInt(4));
+            //mListVideos.add(mFavoriteData);
+
+        // Toast.makeText(this, data, Toast.LENGTH_LONG).show();
+        c.close();
+        return mFavoriteData;
+    }
+    public ArrayList<FavoriteData> loadallVideos() {
+        Cursor c = database.query("tblFavorite",
+                null, null, null, null, null, "videoPosition");
         c.moveToFirst();
         ArrayList<FavoriteData> mListVideos = new ArrayList<FavoriteData>();
         while (c.isAfterLast() == false) {
@@ -106,7 +125,10 @@ public class DBManager {
         if (database.insert("tblFavorite", null, values) == -1) {
             msg = "Failed to insert record";
             Log.d("DATABASE",msg);
-            return  false;
+            FavoriteData mVideoExist = new FavoriteData();
+             mVideoExist = loadVideoByID(mVideo.getVideoId());
+             mVideoExist.setVideoPosition(mVideoExist.getVideoPosition()+1);
+            return  updatePosition(mVideoExist);
 
         } else {
             msg = "insert record is successful";

@@ -22,9 +22,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.GridLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +54,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     private ImageWorker mImageFetcher;
     private PlusClient mPlusClient;
     private GridView mGridView;
-
+    public float widthOfGirdView;
     public VideosGridViewFragment() {
     }
 
@@ -71,21 +74,23 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         mGridView = (GridView) listView.findViewById(R.id.grid_view);
         TextView emptyView = (TextView) listView.findViewById(android.R.id.empty);
         mGridView.setEmptyView(emptyView);
+
         return listView;
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         //setProfileInfo();
-    }
 
+    }
     public void setVideos(List<VideoData> videos) {
         if (!isAdded()) {
             return;
         }
 
-        mGridView.setAdapter(new UploadedVideoAdapter(videos));
+        mGridView.setAdapter(new ListVideoAdapter(videos));
     }
 
     public void setProfileInfo() {
@@ -122,7 +127,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     @Override
     public void onConnected(Bundle bundle) {
         if (mGridView.getAdapter() != null) {
-            ((UploadedVideoAdapter) mGridView.getAdapter()).notifyDataSetChanged();
+            ((ListVideoAdapter) mGridView.getAdapter()).notifyDataSetChanged();
         }
 
         //setProfileInfo();
@@ -193,10 +198,10 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                 .translationY(0);
 
     }
-    private class UploadedVideoAdapter extends BaseAdapter {
+    private class ListVideoAdapter extends BaseAdapter {
         private List<VideoData> mVideos;
 
-        private UploadedVideoAdapter(List<VideoData> videos) {
+        private ListVideoAdapter(List<VideoData> videos) {
             mVideos = videos;
         }
 
@@ -223,8 +228,14 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                         R.layout.list_item, container, false);
             }
 
+//            ViewGroup.LayoutParams param  = (ViewGroup.LayoutParams )convertView.getLayoutParams();
+//            Log.d("heigh gird:",String.valueOf( mGridView.getHeight()));
+//            param.height = (int)(widthOfGirdView/3-5);
+//            param.width = param.height-10;
+//
+//            convertView.setLayoutParams(param);
             VideoData video = mVideos.get(position);
-            ((TextView) convertView.findViewById(android.R.id.text1))
+            ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
                     .setText(video.getTitle());
             mImageFetcher.loadImage(video.getThumbUri(),
                     (ImageView) convertView.findViewById(R.id.thumbnail));

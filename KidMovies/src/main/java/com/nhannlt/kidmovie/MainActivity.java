@@ -111,7 +111,7 @@ public class MainActivity extends Activity implements
     public static final String  BaseURLStringDropBox_1 ="https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
 //static NSString * const BaseURLStringDropBox_2 =@"https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
 public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?export=download&id=0B45IYpZpvVu-NGFqQXhEZmhVbVE";
-    public static final String  BaseURLStringGit ="https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
+    public static final String  BaseURLStringGit ="https://raw.githubusercontent.com/trongnhan68/Kid-Video/master/VideoJson.txt";
 
     public static final String ACCOUNT_KEY = "accountName";
     public static final String MESSAGE_KEY = "message";
@@ -141,6 +141,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private ImageButton btnMusic;
     private ImageButton btnStory;
     private ImageButton btnCartoon;
+    private LinearLayout linearListVideos;
     private String EN_PLAYLIST_ID_MUSIC = "";
     private String EN_PLAYLIST_ID_STORY = "";
     private String EN_PLAYLIST_ID_CARTOON = "";
@@ -167,11 +168,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             showMissingConfigurations();
         } else {
             setContentView(R.layout.activity_main);
-            getActionBar().hide();
-
-           /* LinearLayout.LayoutParams layoutParams =(LinearLayout.LayoutParams) rootView.getLayoutParams();
-            layoutParams.height =  getResources().getDisplayMetrics().heightPixels;*/
-           // rootView.setLayoutParams(layoutParams);
+           getActionBar().hide();
 
             ensureFetcher();
 
@@ -182,6 +179,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
             if (savedInstanceState != null) {
                 mChosenAccountName = savedInstanceState.getString(ACCOUNT_KEY);
+
             } else {
                 loadAccount();
             }
@@ -191,7 +189,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             mVideosGridViewFragment = (VideosGridViewFragment) getFragmentManager()
                     .findFragmentById(R.id.list_fragment);
 
-            new JSONAsyncTask().execute(BaseURLStringDropBox_1);
+            new JSONAsyncTask().execute(BaseURLStringGit);
             initView();
             onClick();
         }
@@ -217,6 +215,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         btnMusic = (ImageButton) this.findViewById(R.id.btn_music);
         btnCartoon = (ImageButton) this.findViewById(R.id.btn_cartoon);
         btnStory = (ImageButton) this.findViewById(R.id.btn_funny);
+
+        linearListVideos = (LinearLayout) this.findViewById(R.id.linear_listVideos);
 // init Preference
         SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
         SharedPreferences.Editor editPre=pre.edit();
@@ -326,11 +326,16 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     }
     private void showListVideo(){
 
-        mVideosGridViewFragment.SetViewVisible();
+        //mVideosGridViewFragment.SetViewVisible();
+       // linearListVideos.
+        linearListVideos.animate()
+                .translationY(-linearListVideos.getHeight());
     }
     private void hideListVideo(){
 
-        mVideosGridViewFragment.SetViewInvisible();
+        //mVideosGridViewFragment.SetViewInvisible();
+        linearListVideos.animate()
+                .translationY(0);
     }
     public void panToVideo(final String youtubeId) {
         popPlayerFromBackStack();
@@ -456,7 +461,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
     private void ensureFetcher() {
         if (mImageFetcher == null) {
-            mImageFetcher = new ImageFetcher(this, 512, 512);
+            mImageFetcher = new ImageFetcher(this, 256, 256);
             mImageFetcher.addImageCache(getFragmentManager(),
                     new com.nhannlt.kidmovie.util.ImageCache.ImageCacheParams(this,
                             "cache"));
@@ -467,7 +472,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         mChosenAccountName = sp.getString(ACCOUNT_KEY, null);
-        //invalidateOptionsMenu();
+        //if (mChosenAccountName==null) chooseAccount();
+        invalidateOptionsMenu();
     }
 
     private void saveAccount() {
@@ -496,14 +502,14 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         }
     }
 
-   /* @Override
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return super.onCreateOptionsMenu(menu);
-    }*/
+    }
 
-    /*@Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
@@ -514,7 +520,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }*/
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -914,7 +920,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             try {
 
                 //------------------>>
-                HttpGet httppost = new HttpGet(BaseURLStringDropBox_1);
+                HttpGet httppost = new HttpGet(urls[0]);
                 HttpClient httpclient = new DefaultHttpClient();
                 HttpResponse response = httpclient.execute(httppost);
 
