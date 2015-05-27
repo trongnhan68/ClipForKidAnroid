@@ -27,6 +27,27 @@
 
             >
 
+            <ImageView
+
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center"
+                android:background="@drawable/television"
+
+                />
+
+            <FrameLayout
+                android:background="@color/wallet_highlighted_text_holo_dark"
+                android:id="@+id/detail_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+               android:paddingTop="@dimen/playerview_top"
+                android:paddingLeft="@dimen/playerview_left"
+                android:paddingRight="@dimen/playerview_left"
+                android:paddingBottom="@dimen/playerview_bottom"
+                />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -72,27 +93,6 @@
 
                 </fragment>
                 </LinearLayout>
-
-            <ImageView
-
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:background="@drawable/television"
-
-                />
-
-            <FrameLayout
-                android:background="@color/wallet_highlighted_text_holo_dark"
-                android:id="@+id/detail_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-               android:paddingTop="@dimen/playerview_top"
-                android:paddingLeft="@dimen/playerview_left"
-                android:paddingRight="@dimen/playerview_left"
-                android:paddingBottom="@dimen/playerview_bottom"
-                />
 
 
         </FrameLayout>

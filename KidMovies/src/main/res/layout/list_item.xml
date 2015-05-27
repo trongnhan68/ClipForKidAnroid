@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:plus="http://schemas.android.com/apk/lib/com.google.android.gms.plus"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="?android:listPreferredItemHeightSmall"
     android:orientation="vertical"
@@ -10,8 +10,8 @@
 
     <LinearLayout
         android:id="@+id/main_target"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="?android:selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -20,16 +20,16 @@
 
         android:paddingTop="10dp">
         <FrameLayout
-            android:background="@drawable/bg_loading"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
 
-                android:background="@drawable/bg_loading"
+                android:background="@drawable/bg"
                 android:scaleType="centerCrop" />
             <TextView
                 android:id="@+id/txtView_videoDuratiion"

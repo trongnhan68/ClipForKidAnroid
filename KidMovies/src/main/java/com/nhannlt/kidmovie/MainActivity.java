@@ -480,6 +480,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         sp.edit().putString(ACCOUNT_KEY, mChosenAccountName).commit();
+        refreshView();
     }
 
     private void loadData(String playListId) {
@@ -726,7 +727,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     public void onVideoSelected(VideoData video) {
         mVideoData = video;
         panToVideo(video.getYouTubeId());
-        mVideosGridViewFragment.SetViewInvisible();
+        hideListVideo();
         FavoriteData mFavoriteData = new FavoriteData();
         mFavoriteData.setVideoId(video.getYouTubeId());
         mFavoriteData.setVideoName(video.getTitle());
@@ -734,6 +735,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         mFavoriteData.setVideoDuration(video.getVideo().getContentDetails().getDuration());
         mFavoriteData.setVideoPosition(0);
         mDBManager.doInsertRecord(mFavoriteData);
+
        /* Intent intent = new Intent(this, PlayActivity.class);
         intent.putExtra(YOUTUBE_ID, video.getYouTubeId());
         startActivityForResult(intent, REQUEST_DIRECT_TAG);*/
