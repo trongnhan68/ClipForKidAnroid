@@ -8,58 +8,62 @@
     android:orientation="vertical"
     android:padding="5dp">
 
+
+
     <LinearLayout
         android:id="@+id/main_target"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?android:selectableItemBackground"
+
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
+android:layout_weight="1"
 
-
-        android:paddingTop="10dp">
+        >
         <FrameLayout
 
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+
+            >
 
             <ImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
 
-                android:background="@drawable/bg"
-                android:scaleType="centerCrop" />
+                android:scaleType="fitXY"
+                android:background="@drawable/common_ic_googleplayservices" />
             <TextView
                 android:id="@+id/txtView_videoDuratiion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right|bottom"
-                android:layout_marginBottom="60dp"
-                android:layout_marginRight="5dp"
+                android:layout_gravity="right|top"
+
+
                 android:textStyle="bold"
                 android:background="@android:color/black"
                 android:textColor="@android:color/white"
                 android:text="2:30" />
-            <TextView
-                android:id="@+id/txtview_videoNameInItem"
-                style="?android:textAppearanceMedium"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:gravity="center_vertical"
-                android:background="@android:color/black"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/textview_video"
-                android:layout_gravity="left|bottom"
-                android:ellipsize="end"
-                android:text="hihi"
 
-                android:fontFamily="sans-serif-condensed"
-                android:maxLines="1" />
         </FrameLayout>
 
+        <TextView
+            android:id="@+id/txtview_videoNameInItem"
+            style="?android:textAppearanceMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:background="@android:color/black"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/textview_video"
 
+            android:ellipsize="end"
+            android:text="hihi"
+
+            android:fontFamily="sans-serif-condensed"
+            android:maxLines="1" />
 
 
     </LinearLayout>

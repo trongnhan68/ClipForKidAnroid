@@ -17,6 +17,10 @@ package com.nhannlt.kidmovie;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.IntentSender;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,6 +39,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.plus.PlusClient;
+import com.nhannlt.kidmovie.lazylist.ImageLoader;
+
 import com.nhannlt.kidmovie.util.ImageFetcher;
 import com.nhannlt.kidmovie.util.ImageWorker;
 import com.nhannlt.kidmovie.util.VideoData;
@@ -52,9 +58,11 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     private static final String TAG = VideosGridViewFragment.class.getName();
     private Callbacks mCallbacks;
     private ImageWorker mImageFetcher;
+    private ImageLoader mImageLoader;
     private PlusClient mPlusClient;
     private GridView mGridView;
     public float widthOfGirdView;
+
     public VideosGridViewFragment() {
     }
 
@@ -91,6 +99,9 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         }
 
         mGridView.setAdapter(new ListVideoAdapter(videos));
+
+//        adapter=new LazyAdapter(this, videos);
+//        mGridView.setAdapter(adapter);
     }
 
     public void setProfileInfo() {
@@ -166,19 +177,21 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         }
 
         mCallbacks = (Callbacks) activity;
-        mImageFetcher = mCallbacks.onGetImageFetcher();
+       // mImageFetcher = mCallbacks.onGetImageFetcher();
+        mImageLoader =  mCallbacks.onGetImageLoader();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
-        mImageFetcher = null;
+        mImageLoader= null;
+        //mImageFetcher = null;
     }
 
     public interface Callbacks {
         ImageFetcher onGetImageFetcher();
-
+        ImageLoader onGetImageLoader();
         void onVideoSelected(VideoData video);
 
         void onConnected(String connectedAccountName);
@@ -237,8 +250,11 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
             VideoData video = mVideos.get(position);
             ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
                     .setText(video.getTitle());
-            mImageFetcher.loadImage(video.getThumbUri(),
+//            mImageFetcher.loadImage(video.getThumbUri(),
+//                    (ImageView) convertView.findViewById(R.id.thumbnail));
+            mImageLoader.DisplayImage(video.getThumbUri(),
                     (ImageView) convertView.findViewById(R.id.thumbnail));
+
             /*if (mPlusClient.isConnected()) {
                 ((PlusOneButton) convertView.findViewById(R.id.plus_button))
                         .initialize(video.getWatchUri(), null);
@@ -253,5 +269,6 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                     });
             return convertView;
         }
+
     }
 }

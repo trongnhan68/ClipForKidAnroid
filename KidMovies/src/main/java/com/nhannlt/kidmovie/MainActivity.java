@@ -66,6 +66,7 @@ import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
+import com.nhannlt.kidmovie.lazylist.ImageLoader;
 import com.nhannlt.kidmovie.util.ImageFetcher;
 import com.nhannlt.kidmovie.util.Upload;
 import com.nhannlt.kidmovie.util.Utils;
@@ -131,6 +132,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     final JsonFactory jsonFactory = new GsonFactory();
     GoogleAccountCredential credential;
     private ImageFetcher mImageFetcher;
+    private ImageLoader mImageLoader;
     private String mChosenAccountName;
     private Uri mFileURI = null;
     private VideoData mVideoData;
@@ -467,7 +469,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             "cache"));
         }
     }
+    private void ensureLoader() {
+        if (mImageLoader == null) {
+            mImageLoader = new ImageLoader(this.getApplicationContext());
 
+        }
+    }
     private void loadAccount() {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
@@ -721,6 +728,11 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     public ImageFetcher onGetImageFetcher() {
         ensureFetcher();
         return mImageFetcher;
+    }
+    @Override
+    public ImageLoader onGetImageLoader() {
+        ensureLoader();
+        return mImageLoader;
     }
 
     @Override
