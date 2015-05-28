@@ -187,6 +187,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         mCallbacks = null;
         mImageLoader= null;
         //mImageFetcher = null;
+
     }
 
     public interface Callbacks {
@@ -241,12 +242,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                         R.layout.list_item, container, false);
             }
 
-//            ViewGroup.LayoutParams param  = (ViewGroup.LayoutParams )convertView.getLayoutParams();
-//            Log.d("heigh gird:",String.valueOf( mGridView.getHeight()));
-//            param.height = (int)(widthOfGirdView/3-5);
-//            param.width = param.height-10;
-//
-//            convertView.setLayoutParams(param);
+
             VideoData video = mVideos.get(position);
             ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
                     .setText(video.getTitle());

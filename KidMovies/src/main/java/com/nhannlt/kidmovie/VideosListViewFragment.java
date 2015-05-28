@@ -23,8 +23,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +32,9 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.plus.PlusClient;
-import com.nhannlt.kidmovie.util.ImageFetcher;
-import com.nhannlt.kidmovie.util.ImageWorker;
+import com.nhannlt.kidmovie.lazylist.ImageLoader;
+
+
 import com.nhannlt.kidmovie.util.VideoData;
 
 import java.util.List;
@@ -48,9 +49,9 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
 
     private static final String TAG = VideosListViewFragment.class.getName();
     private Callbacks mCallbacks;
-    private ImageWorker mImageFetcher;
+    private ImageLoader mImageLoader;
     private PlusClient mPlusClient;
-    private GridView mGridView;
+    private ListView mListView;
 
     public VideosListViewFragment() {
     }
@@ -67,10 +68,10 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View listView = inflater.inflate(R.layout.list_fragment, container, false);
-        mGridView = (GridView) listView.findViewById(R.id.grid_view);
+        View listView = inflater.inflate(R.layout.listview_fragment, container, false);
+        mListView = (ListView) listView.findViewById(R.id.list_view);
         TextView emptyView = (TextView) listView.findViewById(android.R.id.empty);
-        mGridView.setEmptyView(emptyView);
+        mListView.setEmptyView(emptyView);
         return listView;
     }
 
@@ -85,7 +86,7 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
             return;
         }
 
-        mGridView.setAdapter(new UploadedVideoAdapter(videos));
+        mListView.setAdapter(new FavoriteVideoAdapter(videos));
     }
 
     public void setProfileInfo() {
@@ -121,8 +122,8 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
 
     @Override
     public void onConnected(Bundle bundle) {
-        if (mGridView.getAdapter() != null) {
-            ((UploadedVideoAdapter) mGridView.getAdapter()).notifyDataSetChanged();
+        if (mListView.getAdapter() != null) {
+            ((FavoriteVideoAdapter) mListView.getAdapter()).notifyDataSetChanged();
         }
 
         //setProfileInfo();
@@ -161,20 +162,20 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
         }
 
         mCallbacks = (Callbacks) activity;
-        mImageFetcher = mCallbacks.onGetImageFetcher();
+        mImageLoader = mCallbacks.onGetImageLoader();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
-        mImageFetcher = null;
+        mImageLoader = null;
     }
 
     public interface Callbacks {
-        ImageFetcher onGetImageFetcher();
+        ImageLoader onGetImageLoader();
 
-        void onVideoSelected(VideoData video);
+        void onVideoFavoriteSelected(VideoData video);
 
         void onConnected(String connectedAccountName);
     }
@@ -183,10 +184,10 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
 
       getView().setVisibility(View.INVISIBLE);
   }
-    private class UploadedVideoAdapter extends BaseAdapter {
+    private class FavoriteVideoAdapter extends BaseAdapter {
         private List<VideoData> mVideos;
 
-        private UploadedVideoAdapter(List<VideoData> videos) {
+        private FavoriteVideoAdapter(List<VideoData> videos) {
             mVideos = videos;
         }
 
@@ -214,10 +215,13 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
             }
 
             VideoData video = mVideos.get(position);
-            ((TextView) convertView.findViewById(android.R.id.text1))
+            ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
                     .setText(video.getTitle());
-            mImageFetcher.loadImage(video.getThumbUri(),
+//            mImageFetcher.loadImage(video.getThumbUri(),
+//                    (ImageView) convertView.findViewById(R.id.thumbnail));
+            mImageLoader.DisplayImage(video.getThumbUri(),
                     (ImageView) convertView.findViewById(R.id.thumbnail));
+
             /*if (mPlusClient.isConnected()) {
                 ((PlusOneButton) convertView.findViewById(R.id.plus_button))
                         .initialize(video.getWatchUri(), null);
@@ -227,7 +231,7 @@ public class VideosListViewFragment extends Fragment implements ConnectionCallba
                         @Override
                         public void onClick(View view) {
 
-                            mCallbacks.onVideoSelected(mVideos.get(position));
+                            mCallbacks.onVideoFavoriteSelected(mVideos.get(position));
                         }
                     });
             return convertView;
