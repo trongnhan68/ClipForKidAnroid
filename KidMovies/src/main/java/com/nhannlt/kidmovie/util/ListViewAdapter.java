@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nhannlt.kidmovie.FavoriteData;
 import com.nhannlt.kidmovie.R;
 import com.nhannlt.kidmovie.lazylist.ImageLoader;
 
@@ -18,17 +19,30 @@ import java.util.List;
  * Created by nhan on 5/28/2015.
  */
 public class ListViewAdapter extends BaseAdapter {
-    private List<VideoData> mVideos;
+    private List<FavoriteData> mVideos;
     private ImageLoader mImageLoader;
 private Context mActivity;
+private  CallbackFavoriteView callback;
 
-
-    public ListViewAdapter(Context context, List<VideoData> videos) {
+    public ListViewAdapter(Context context, List<FavoriteData> videos) {
         this.mActivity = context;
         mVideos = videos;
         mImageLoader = new ImageLoader(mActivity);
-    }
+        //this.callback = mActivity.get
+        //mActivity.
+        try {
+            this.callback = ((CallbackFavoriteView) context);
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement AdapterCallback.");
+        }
 
+
+    }
+    public interface CallbackFavoriteView {
+
+        void onVideoFavoriteSelected(FavoriteData video);
+
+    }
     @Override
     public int getCount() {
         return mVideos.size();
@@ -41,7 +55,7 @@ private Context mActivity;
 
     @Override
     public long getItemId(int i) {
-        return mVideos.get(i).getYouTubeId().hashCode();
+        return mVideos.get(i).getVideoId().hashCode();
     }
 
     @Override
@@ -49,17 +63,18 @@ private Context mActivity;
                         ViewGroup container) {
         if (convertView == null) {
             convertView = LayoutInflater.from(mActivity).inflate(
-                    R.layout.list_item, container, false);
+                    R.layout.item_favorite, container, false);
         }
 
-        VideoData video = mVideos.get(position);
+        FavoriteData video = mVideos.get(position);
         ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
-                .setText(video.getTitle());
+                .setText(video.getVideoName());
 //            mImageFetcher.loadImage(video.getThumbUri(),
 //                    (ImageView) convertView.findViewById(R.id.thumbnail));
-        mImageLoader.DisplayImage(video.getThumbUri(),
+        mImageLoader.DisplayImage(video.getVideoUrl(),
                 (ImageView) convertView.findViewById(R.id.thumbnail));
 
+        //img.setBackground();
             /*if (mPlusClient.isConnected()) {
                 ((PlusOneButton) convertView.findViewById(R.id.plus_button))
                         .initialize(video.getWatchUri(), null);
@@ -69,7 +84,7 @@ private Context mActivity;
                     @Override
                     public void onClick(View view) {
 
-                       // mCallbacks.onVideoFavoriteSelected(mVideos.get(position));
+                        callback.onVideoFavoriteSelected(mVideos.get(position));
                     }
                 });
         return convertView;

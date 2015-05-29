@@ -35,7 +35,7 @@ public class ImageLoader {
         executorService=Executors.newFixedThreadPool(5);
     }
     
-    final int stub_id= R.drawable.bg_loading;
+    final int stub_id= R.drawable.bg_search;
     public void DisplayImage(String url, ImageView imageView)
     {
         imageViews.put(imageView, url);
@@ -45,7 +45,7 @@ public class ImageLoader {
         else
         {
             queuePhoto(url, imageView);
-            imageView.setImageResource(stub_id);
+            //imageView.setImageResource(stub_id);
         }
     }
         
@@ -98,11 +98,11 @@ public class ImageLoader {
             stream1.close();
             
             //Find the correct scale value. It should be the power of 2.
-            final int REQUIRED_SIZE=156;
+            final int REQUIRED_SIZE=512;
             int width_tmp=o.outWidth, height_tmp=o.outHeight;
             int scale=1;
             while(true){
-                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE)
+                if(width_tmp/2<REQUIRED_SIZE || height_tmp/2<REQUIRED_SIZE*80/100)
                     break;
                 width_tmp/=2;
                 height_tmp/=2;
@@ -177,8 +177,8 @@ public class ImageLoader {
                 return;
             if(bitmap!=null)
                 photoToLoad.imageView.setImageBitmap(bitmap);
-            else
-                photoToLoad.imageView.setImageResource(stub_id);
+//            else
+//                photoToLoad.imageView.setImageResource(stub_id);
         }
     }
 

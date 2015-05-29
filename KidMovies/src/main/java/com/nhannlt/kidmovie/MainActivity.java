@@ -96,7 +96,7 @@ import java.util.List;
  *         Main activity class which handles authorization and intents.
  */
 public class MainActivity extends Activity implements
-        VideosGridViewFragment.Callbacks, PlayerStateChangeListener, OnFullscreenListener  {
+        VideosGridViewFragment.Callbacks, PlayerStateChangeListener, OnFullscreenListener, ListViewAdapter.CallbackFavoriteView {
     // private static final int MEDIA_TYPE_VIDEO = 7;
     private static final String YOUTUBE_FRAGMENT_TAG = "youtube";
     public  String TAG = "MAIN";
@@ -199,6 +199,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
            /* mVideosListViewFragment = (VideosListViewFragment) getFragmentManager()
                     .findFragmentById(R.id.listview_favorite);*/
             mListFavorite = (ListView) this.findViewById(R.id.listview_favorite);
+
+            ListViewAdapter listAdapter;
+            listAdapter = new ListViewAdapter(this,mDBManager.loadallVideos());
+
+            mListFavorite.setAdapter(listAdapter);
+
 
             new JSONAsyncTask().execute(BaseURLStringGit);
             initView();
@@ -339,14 +345,44 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
         //mVideosGridViewFragment.SetViewVisible();
        // linearListVideos.
-        linearListVideos.animate()
-                .translationY(-linearListVideos.getHeight());
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                //* The Complete ProgressBar does not appear**/
+                //linearListVideos.setVisibility(View.VISIBLE);
+                linearListVideos.setVisibility(View.VISIBLE);
+                linearListVideos.animate()
+                        .translationY(0).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+
+                }
+            });
+
+            }
+        });
+
     }
     private void hideListVideo(){
 
         //mVideosGridViewFragment.SetViewInvisible();
-        linearListVideos.animate()
-                .translationY(0);
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                //* The Complete ProgressBar does not appear**/
+                //linearListVideos.setVisibility(View.INVISIBLE);
+                linearListVideos.animate()
+                        .translationY(-linearListVideos.getHeight()).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        linearListVideos.setVisibility(View.INVISIBLE);
+                    }
+                });
+
+            }
+        });
+
+
     }
     public void panToVideo(final String youtubeId) {
         popPlayerFromBackStack();
@@ -496,7 +532,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         sp.edit().putString(ACCOUNT_KEY, mChosenAccountName).commit();
-        refreshView();
+        new JSONAsyncTask().execute(BaseURLStringGit);
+        //refreshView();
     }
 
     private void loadData(String playListId) {
@@ -645,6 +682,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
     private void loadVideosByPlayListId(String playListId, final int type) {
         if (mChosenAccountName == null) {
+           chooseAccount();
             return;
         }
 
@@ -726,7 +764,22 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 mVideosGridViewFragment.setVideos(videos);
             } else {  // get favorite videos
                 //mVideosListViewFragment.setVideos(videos);
-                mListFavorite.setAdapter(new ListViewAdapter(getApplicationContext(), videos));
+                List<FavoriteData> favoriteVideos = new ArrayList<FavoriteData>();
+                for (int i=0;i<videos.size();i++) {
+                    FavoriteData mDataFavorite = new FavoriteData();
+                    mDataFavorite.setVideoId(videos.get(i).getYouTubeId());
+                    mDataFavorite.setVideoName(videos.get(i).getTitle());
+                    mDataFavorite.setVideoUrl(videos.get(i).getThumbUri());
+                    mDataFavorite.setVideoDuration(videos.get(i).getVideo().getContentDetails().getDuration());
+                    mDataFavorite.setVideoPosition(0);
+                    favoriteVideos.add(mDataFavorite);
+                    if (mDBManager.doInsertRecord(mDataFavorite)) {
+                       Log.d("add new video ", " " +mDataFavorite.getVideoName());
+                    };
+
+                }
+               if (mListFavorite.getAdapter()==null)
+                mListFavorite.setAdapter(new ListViewAdapter(getApplicationContext(), favoriteVideos));
             }
             }
 
@@ -873,6 +926,18 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
     }
 
+    @Override
+    public void onVideoFavoriteSelected(FavoriteData video) {
+        //mVideoData = video;
+
+
+        panToVideo(video.getVideoId());
+        mDBManager.updatePosition(video);
+
+        hideListVideo();
+
+    }
+
     /**
      * Private class representing a missing configuration and what the developer
      * can do to fix the issue.
@@ -1013,13 +1078,19 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     editPre.commit();
                     refreshView();
 
+
                     String location = pre.getString(PRE_LOCATION, "EN");
-                    if (location.equals("VN")) {
-                        loadVideosByPlayListId(VN_PLAYLIST_ID_FAVORITE,1);
-                        Log.d(TAG,"Load favorite VN");
-                    } else {
-                        loadVideosByPlayListId(EN_PLAYLIST_ID_FAVORITE,1);
-                        Log.d(TAG, "Load favorite VN");
+
+                    boolean isFirstTimeApp = pre.getBoolean("isFirstTimeApp",false);
+                    if (!isFirstTimeApp) {
+                        if (location.equals("VN")) {
+                            loadVideosByPlayListId(VN_PLAYLIST_ID_FAVORITE, 1);
+                            Log.d(TAG, "Load favorite VN");
+                        } else {
+                            loadVideosByPlayListId(EN_PLAYLIST_ID_FAVORITE, 1);
+                            Log.d(TAG, "Load favorite VN");
+                        }
+                   editPre.putBoolean("isFirstTimeApp",true);
                     }
 
                 } catch (JSONException ex) {

@@ -6,7 +6,7 @@
 
 
     android:orientation="vertical"
-    android:padding="5dp">
+   >
 
 
 
@@ -30,10 +30,10 @@
 
             <ImageView
                 android:id="@+id/thumbnail"
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
 
-                android:scaleType="fitCenter"
+                android:scaleType="fitXY"
                />
             <TextView
                 android:id="@+id/txtView_videoDuratiion"
