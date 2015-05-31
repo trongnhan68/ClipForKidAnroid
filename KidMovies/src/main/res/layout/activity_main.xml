@@ -2,18 +2,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg"
     android:divider="?android:dividerHorizontal"
     android:horizontalSpacing="10dp"
     android:orientation="horizontal"
     android:showDividers="middle"
-    android:background="@drawable/bg"
 
     android:verticalSpacing="10dp">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="7.3"
+        android:layout_weight="7.7"
         android:divider="?android:dividerHorizontal"
         android:horizontalSpacing="10dp"
         android:orientation="vertical"
@@ -37,95 +37,128 @@
                 />
 
             <FrameLayout
-                android:background="@color/wallet_highlighted_text_holo_dark"
+
                 android:id="@+id/detail_container"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-               android:paddingTop="@dimen/playerview_top"
+                android:paddingBottom="@dimen/playerview_bottom"
                 android:paddingLeft="@dimen/playerview_left"
                 android:paddingRight="@dimen/playerview_left"
-                android:paddingBottom="@dimen/playerview_bottom"
-                />
+                android:paddingTop="@dimen/playerview_top" />
 
             <LinearLayout
+                android:id="@+id/linear_listVideos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/linear_listVideos"
-                >
-                <LinearLayout
+                android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+
+                        android:background="@android:color/black"
+                        android:gravity="center_horizontal"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/btn_music"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/en_music"
+
+                            ></ImageButton>
+
+                        <ImageButton
+                            android:id="@+id/btn_funny"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/en_story_select"
+
+                            ></ImageButton>
+
+                        <ImageButton
+                            android:id="@+id/btn_cartoon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/en_cartoon"
+
+                            ></ImageButton>
+                    </LinearLayout>
+
+
+
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent">
 
-                    android:background="@android:color/black"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
-                    <ImageButton
-                        android:id="@+id/btn_music"
-                        android:background="@drawable/en_music"
-                        android:layout_width="wrap_content"
+                    <fragment
+
+                        android:id="@+id/list_fragment"
+                        android:name="com.nhannlt.kidmovie.VideosGridViewFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:layout="@layout/list_fragment">
+                    </fragment>
+
+                    <SearchView
+                        android:id="@+id/searchView"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
 
-                        ></ImageButton>
-                    <ImageButton
-                        android:id="@+id/btn_funny"
-                        android:background="@drawable/en_story_select"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:background="@android:color/black"
 
-                        ></ImageButton>
-                    <ImageButton
-                        android:id="@+id/btn_cartoon"
-                        android:background="@drawable/en_cartoon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        />
 
-                        ></ImageButton>
-                </LinearLayout>
-                <fragment
-                    android:id="@+id/list_fragment"
-                    android:name="com.nhannlt.kidmovie.VideosGridViewFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                </FrameLayout>
 
-                    tools:layout="@layout/list_fragment">
-
-                </fragment>
-                </LinearLayout>
+            </LinearLayout>
 
 
         </FrameLayout>
 
 
         <LinearLayout
-            android:layout_gravity="bottom"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_gravity="bottom"
             android:layout_marginBottom="10dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/imgBtn_thuvien"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/list"
+                android:layout_marginLeft="10dp"
 
-                android:layout_marginLeft="10dp" />
+                android:background="@drawable/list" />
 
             <TextView
-                android:layout_width="0dp"
+                android:id="@+id/txtView_videoname_main"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="Ca khuc thieu nhi"
-              />
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+
+                android:text="WELCOME! CLICK LIST BUTTON TO EXPLORER VIDEOS !"
+                android:textColor="#ff060c3e"
+                android:textSize="20dp"
+                android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/imgBtn_menu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/menu"
 
                 />
@@ -136,21 +169,20 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2.7"
-     android:orientation="vertical"
-        >
+        android:layout_weight="2.3"
+        android:orientation="vertical">
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/favorite"
-           />
+            android:background="@drawable/favorite" />
+
         <ListView
             android:id="@+id/listview_favorite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            />
-        />
+             />
+
     </LinearLayout>
 </LinearLayout>

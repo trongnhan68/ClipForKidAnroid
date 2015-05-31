@@ -5,38 +5,46 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nhannlt.kidmovie.FavoriteData;
 import com.nhannlt.kidmovie.R;
 import com.nhannlt.kidmovie.lazylist.ImageLoader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by nhan on 5/28/2015.
  */
 public class ListViewAdapter extends BaseAdapter {
-    private List<FavoriteData> mVideos;
+    private List<FavoriteData> mVideos = new ArrayList<FavoriteData>();
     private ImageLoader mImageLoader;
 private Context mActivity;
 private  CallbackFavoriteView callback;
-
-    public ListViewAdapter(Context context, List<FavoriteData> videos) {
+private int heightScreen;
+    public ListViewAdapter(Context context, List<FavoriteData> videos,int heightScreen) {
         this.mActivity = context;
-        mVideos = videos;
-        mImageLoader = new ImageLoader(mActivity);
+        this.mVideos = videos;
+        this.heightScreen = heightScreen;
+        mImageLoader = new ImageLoader(this.mActivity);
         //this.callback = mActivity.get
         //mActivity.
         try {
-            this.callback = ((CallbackFavoriteView) context);
+            this.callback = ((CallbackFavoriteView)context);
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement AdapterCallback.");
         }
 
 
+    }
+    public  void setVideos(List<FavoriteData> videos){
+
+        this.mVideos = videos;
     }
     public interface CallbackFavoriteView {
 
@@ -65,7 +73,13 @@ private  CallbackFavoriteView callback;
             convertView = LayoutInflater.from(mActivity).inflate(
                     R.layout.item_favorite, container, false);
         }
+        try {
+            final AbsListView.LayoutParams params = (AbsListView.LayoutParams) convertView.getLayoutParams();
+            params.height = this.heightScreen/3;
+            convertView.setLayoutParams(params);
+        }
 
+        catch(Exception ex) {}
         FavoriteData video = mVideos.get(position);
         ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
                 .setText(video.getVideoName());
@@ -74,11 +88,8 @@ private  CallbackFavoriteView callback;
         mImageLoader.DisplayImage(video.getVideoUrl(),
                 (ImageView) convertView.findViewById(R.id.thumbnail));
 
-        //img.setBackground();
-            /*if (mPlusClient.isConnected()) {
-                ((PlusOneButton) convertView.findViewById(R.id.plus_button))
-                        .initialize(video.getWatchUri(), null);
-            }*/
+        ((TextView) convertView.findViewById(R.id.txtView_videoDuratiion))
+                .setText(Utils.timeHumanReadable(video.getVideoDuration()));
         convertView.findViewById(R.id.main_target).setOnClickListener(
                 new View.OnClickListener() {
                     @Override

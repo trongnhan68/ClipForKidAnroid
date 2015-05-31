@@ -7,6 +7,7 @@
     android:background="@android:color/black"
     android:showDividers="middle">
 
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

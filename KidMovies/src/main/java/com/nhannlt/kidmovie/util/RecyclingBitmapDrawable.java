@@ -25,7 +25,7 @@ import com.nhannlt.kidmovie.BuildConfig;
 /**
  * A BitmapDrawable that keeps track of whether it is being displayed or cached.
  * When the drawable is no longer being displayed or cached,
- * {@link android.graphics.Bitmap#recycle() recycle()} will be called on this drawable's bitmap.
+ * {@link Bitmap#recycle() recycle()} will be called on this drawable's bitmap.
  */
 public class RecyclingBitmapDrawable extends BitmapDrawable {
 

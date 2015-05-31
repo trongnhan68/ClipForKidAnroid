@@ -200,7 +200,7 @@ public abstract class ImageWorker {
      * example, you could resize a large bitmap here, or pull down an image from the network.
      *
      * @param data The data to identify which image to process, as provided by
-     *             {@link ImageWorker#loadImage(Object, android.widget.ImageView)}
+     *             {@link ImageWorker#loadImage(Object, ImageView)}
      * @return The processed bitmap
      */
     protected abstract Bitmap processBitmap(Object data);

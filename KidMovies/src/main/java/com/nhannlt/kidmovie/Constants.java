@@ -29,4 +29,5 @@ public class Constants {
     public static final int tab_music=1;
     public static final int tab_story=2;
     public static final int tab_cartoon=3;
+    public static final int tab_search=4;
 }

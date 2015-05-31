@@ -95,7 +95,7 @@ public class DBManager {
     }
     public ArrayList<FavoriteData> loadallVideos() {
         Cursor c = database.query("tblFavorite",
-                null, null, null, null, null, "videoPosition");
+                null, null, null, null, null, "videoPosition DESC");
         c.moveToFirst();
         ArrayList<FavoriteData> mListVideos = new ArrayList<FavoriteData>();
         while (c.isAfterLast() == false) {

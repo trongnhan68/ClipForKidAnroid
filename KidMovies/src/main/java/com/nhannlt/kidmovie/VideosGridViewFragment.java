@@ -16,6 +16,7 @@ package com.nhannlt.kidmovie;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -43,6 +44,7 @@ import com.nhannlt.kidmovie.lazylist.ImageLoader;
 
 import com.nhannlt.kidmovie.util.ImageFetcher;
 import com.nhannlt.kidmovie.util.ImageWorker;
+import com.nhannlt.kidmovie.util.Utils;
 import com.nhannlt.kidmovie.util.VideoData;
 
 import java.util.List;
@@ -57,13 +59,12 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
 
     private static final String TAG = VideosGridViewFragment.class.getName();
     private Callbacks mCallbacks;
-    private ImageWorker mImageFetcher;
     private ImageLoader mImageLoader;
     private PlusClient mPlusClient;
     private GridView mGridView;
     public float widthOfGirdView;
-
     public VideosGridViewFragment() {
+
     }
 
     @Override
@@ -82,10 +83,8 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         mGridView = (GridView) listView.findViewById(R.id.grid_view);
         TextView emptyView = (TextView) listView.findViewById(android.R.id.empty);
         mGridView.setEmptyView(emptyView);
-
-        return listView;
+    return listView;
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -93,6 +92,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         //setProfileInfo();
 
     }
+
     public void setVideos(List<VideoData> videos) {
         if (!isAdded()) {
             return;
@@ -100,8 +100,6 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
 
         mGridView.setAdapter(new ListVideoAdapter(videos));
 
-//        adapter=new LazyAdapter(this, videos);
-//        mGridView.setAdapter(adapter);
     }
 
     public void setProfileInfo() {
@@ -179,6 +177,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         mCallbacks = (Callbacks) activity;
        // mImageFetcher = mCallbacks.onGetImageFetcher();
         mImageLoader =  mCallbacks.onGetImageLoader();
+
     }
 
     @Override
@@ -195,28 +194,14 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         ImageLoader onGetImageLoader();
         void onVideoSelected(VideoData video);
 
-        void onConnected(String connectedAccountName);
     }
-  public  void SetViewInvisible ()
-  {
 
-      //getView().setVisibility(View.INVISIBLE);
-      getView().animate()
-              .translationY(-getView().getHeight());
-  }
-    public  void SetViewVisible ()
-    {
-
-        //getView().setVisibility(View.VISIBLE);
-        getView().animate()
-                .translationY(0);
-
-    }
     private class ListVideoAdapter extends BaseAdapter {
         private List<VideoData> mVideos;
 
         private ListVideoAdapter(List<VideoData> videos) {
             mVideos = videos;
+
         }
 
         @Override
@@ -250,7 +235,15 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
 //                    (ImageView) convertView.findViewById(R.id.thumbnail));
             mImageLoader.DisplayImage(video.getThumbUri(),
                     (ImageView) convertView.findViewById(R.id.thumbnail));
+            ((TextView) convertView.findViewById(R.id.txtView_videoDuratiion))
+                    .setText(Utils.timeHumanReadable(video.getVideo().getContentDetails().getDuration()));
+            try {
+                final AbsListView.LayoutParams params = (AbsListView.LayoutParams) convertView.getLayoutParams();
+                params.height = container.getWidth()/3-20;
+                convertView.setLayoutParams(params);
+            }
 
+            catch(Exception ex) {}
             /*if (mPlusClient.isConnected()) {
                 ((PlusOneButton) convertView.findViewById(R.id.plus_button))
                         .initialize(video.getWatchUri(), null);
