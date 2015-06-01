@@ -170,7 +170,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     List<VideoData> EN_VIDEOS_MUSIC,EN_VIDEOS_STORY,EN_VIDEOS_CARTOON,VN_VIDEOS_MUSIC,VN_VIDEOS_STORY,VN_VIDEOS_CARTOON,VIDEOS_SEARCH ;
     String pageTokenSearch="", EN_PAGETOKEN_MUSIC = "", EN_PAGETOKEN_STORY = "", EN_PAGETOKEN_CARTOON = "",
     VN_PAGETOKEN_MUSIC = "", VN_PAGETOKEN_STORY = "", VN_PAGETOKEN_CARTOON = "";
-            ;
+
     SearchView search;
     private DBManager mDBManager;
 
@@ -310,7 +310,13 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // TODO Auto-generated method stub
-                 searchVideosByContent(query,"");
+
+                SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editPre=pre.edit();
+                editPre.putInt(PRE_IN_TAB, Constants.tab_search);
+                editPre.commit();
+
+                 searchVideosByContent(query);
                 Toast.makeText(getBaseContext(), query,
                         Toast.LENGTH_SHORT).show();
 
@@ -337,8 +343,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music_select));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-
+                  if (VN_VIDEOS_MUSIC.size() == 0)
                      loadData(VN_PLAYLIST_ID_MUSIC,VN_PAGETOKEN_MUSIC);
+                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_MUSIC);
                  } else
                  {
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music_select));
@@ -803,7 +810,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             for (PlaylistItem item : pilr.getItems()) {
                                 videoIds.add(item.getContentDetails().getVideoId());
                             }
+
                             String pageToken = "";
+                           if (pilr.getNextPageToken()!=null)
                             pageToken = pilr.getNextPageToken();
 
 
@@ -832,33 +841,47 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                                             videoData2.getTitle());
                                 }
                             });
-                            SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+                        if (type == 0 ) {
+                            SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
                             String location = pre.getString(PRE_LOCATION, "EN");
                             int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
                             switch (inTab) {
                                 case Constants.tab_music:
                                     if (location.equals("VN")) {
                                         VN_PAGETOKEN_MUSIC = pageToken;
+                                        VN_VIDEOS_MUSIC.addAll(videos);
+                                        return VN_VIDEOS_MUSIC;
+
                                     } else {
                                         EN_PAGETOKEN_MUSIC = pageToken;
+                                        EN_VIDEOS_MUSIC.addAll(videos);
+                                        return EN_VIDEOS_MUSIC;
                                     }
-                                    break;
+
                                 case Constants.tab_story:
                                     if (location.equals("VN")) {
                                         VN_PAGETOKEN_STORY = pageToken;
+                                        VN_VIDEOS_STORY.addAll(videos);
+                                        return VN_VIDEOS_STORY;
                                     } else {
                                         EN_PAGETOKEN_STORY = pageToken;
+                                        EN_VIDEOS_STORY.addAll(videos);
+                                        return EN_VIDEOS_STORY;
                                     }
-                                    break;
+
                                 case Constants.tab_cartoon:
                                     if (location.equals("VN")) {
                                         VN_PAGETOKEN_CARTOON = pageToken;
+                                        VN_VIDEOS_CARTOON.addAll(videos);
+                                        return VN_VIDEOS_CARTOON;
                                     } else {
                                         EN_PAGETOKEN_CARTOON = pageToken;
+                                        EN_VIDEOS_CARTOON.addAll(videos);
+                                        return EN_VIDEOS_CARTOON;
                                     }
-                                    break;
-                            }
 
+                            }
+                        }
                             return videos;
 
                         } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
@@ -882,6 +905,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     return;
                 }
             if (type == 0 ) { // get videos in playlist
+
+
+                mVideosGridViewFragment.setIsLoading(false);
                 mVideosGridViewFragment.setVideos(videos);
             } else {  // get favorite videos
                 //mVideosListViewFragment.setVideos(videos);
@@ -911,7 +937,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
         }.execute(playListId);
     }
-    private void searchVideosByContent(final String content, final String pageToken) {
+    private void searchVideosByContent(final String content) {
         if (mChosenAccountName == null) {
             chooseAccount();
             return;
@@ -933,7 +959,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     List<VideoData> videos = new ArrayList<VideoData>();
 
                     SearchListResponse pilr = youtube.search()
-                            .list("id").setQ(content).setPageToken(pageToken)
+                            .list("id").setQ(content).setPageToken(pageTokenSearch)
                             .setMaxResults(20l).execute();
 
                     List<String> videoIds = new ArrayList<String>();
@@ -943,7 +969,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     for (SearchResult item : pilr.getItems()) {
                         videoIds.add(item.getId().getVideoId());
                     }
+                    if (pilr.getNextPageToken()!= null)
                     pageTokenSearch = pilr.getNextPageToken();
+                    else pageTokenSearch = "";
                     // Get details of uploaded videos with a videos list
                     // request.
                     VideoListResponse vlr = youtube.videos()
@@ -970,7 +998,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                         }
                     });
 
-                    return videos;
+                            VIDEOS_SEARCH.addAll(videos);
+                            return VIDEOS_SEARCH;
+
 
                 } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
                     showGooglePlayServicesAvailabilityErrorDialog(availabilityException
@@ -988,7 +1018,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             @Override
             protected void onPostExecute(List<VideoData> videos) {
                 setProgressBarIndeterminateVisibility(false);
-                 Log.d("Size: ", "" + videos.size());
+                Log.d("Size: ", "" + videos.size());
+                if (VIDEOS_SEARCH.size() <= 20) {
+                    mVideosGridViewFragment = new VideosGridViewFragment();
+
+                }
+                mVideosGridViewFragment.setIsLoading(false);
                 mVideosGridViewFragment.setVideos(videos);
             }
 
@@ -1033,6 +1068,42 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 listAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    @Override
+    public void onLoadMore() {
+        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+        String location = pre.getString(PRE_LOCATION, "EN");
+        int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
+        switch (inTab) {
+            case Constants.tab_music:
+                if (location.equals("VN")) {
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_MUSIC,0,VN_PAGETOKEN_MUSIC);
+                } else {
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_MUSIC,0,EN_PAGETOKEN_MUSIC);
+                }
+                break;
+            case Constants.tab_story:
+                if (location.equals("VN")) {
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_STORY,0,VN_PAGETOKEN_STORY);
+                } else {
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_STORY,0,EN_PAGETOKEN_STORY);
+                }
+                break;
+            case Constants.tab_cartoon:
+                if (location.equals("VN")) {
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_CARTOON,0,VN_PAGETOKEN_CARTOON);
+                } else {
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_CARTOON,0,EN_PAGETOKEN_CARTOON);
+                }
+                break;
+            case Constants.tab_search:
+                searchVideosByContent("");
+
+                break;
+        }
+
+
     }
 
 
@@ -1295,7 +1366,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             Log.d(TAG, "Load favorite VN");
                         } else {
                             loadVideosByPlayListId(EN_PLAYLIST_ID_FAVORITE, 1,"");
-                            Log.d(TAG, "Load favorite VN");
+                            Log.d(TAG, "Load favorite EN");
                         }
                    editPre.putBoolean("isFirstTimeApp",true);
                     }

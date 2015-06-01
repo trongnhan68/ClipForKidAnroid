@@ -63,6 +63,10 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     private PlusClient mPlusClient;
     private GridView mGridView;
     public float widthOfGirdView;
+    private boolean isLoading = false;
+    ListVideoAdapter videoAdapter;
+    public int currentFirstVisibleItem,currentVisibleItemCount,currentScrollState ;
+
     public VideosGridViewFragment() {
 
     }
@@ -93,12 +97,46 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
 
     }
 
-    public void setVideos(List<VideoData> videos) {
+    public void setIsLoading (boolean isloading){
+
+        this.isLoading = isloading;
+    }
+    public void setVideos(final List<VideoData> videos) {
         if (!isAdded()) {
             return;
         }
+        if (videoAdapter == null) {
+             videoAdapter = new ListVideoAdapter(videos);
 
-        mGridView.setAdapter(new ListVideoAdapter(videos));
+            mGridView.setAdapter(videoAdapter);
+            if (videoAdapter.getCount() < 3)
+                isLoading = true;
+        } else
+        {
+            videoAdapter.setVideos(videos);
+            videoAdapter.notifyDataSetChanged();
+
+        }
+
+
+        mGridView.setOnScrollListener(new AbsListView.OnScrollListener(){
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+            {
+                if(firstVisibleItem + visibleItemCount >= totalItemCount && !isLoading) {
+                    // End has been reached
+                    Log.d("GridView scroll: ", ""+firstVisibleItem + " " + visibleItemCount + " "+totalItemCount);
+                    mCallbacks.onLoadMore();
+                    isLoading = true;
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState){
+                Log.d("GridView scroll: ", ""+scrollState);
+            }
+        });
+
 
     }
 
@@ -193,6 +231,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         ImageFetcher onGetImageFetcher();
         ImageLoader onGetImageLoader();
         void onVideoSelected(VideoData video);
+        void onLoadMore();
 
     }
 
@@ -203,7 +242,11 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
             mVideos = videos;
 
         }
+        public void setVideos (List<VideoData> videos){
 
+            this.mVideos = videos;
+
+        }
         @Override
         public int getCount() {
             return mVideos.size();
