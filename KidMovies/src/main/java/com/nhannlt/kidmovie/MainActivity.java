@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements
     private static final String YOUTUBE_FRAGMENT_TAG = "youtube";
     public  String TAG = "MAIN";
 
-
+    public String searchKey = "";
     private YouTubePlayer mYouTubePlayer;
     private boolean mIsFullScreen = false;
     JSONArray myFirstVideos = new JSONArray();
@@ -299,26 +299,37 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public void onFocusChange(View v, boolean hasFocus) {
                 // TODO Auto-generated method stub
 
-                Toast.makeText(getBaseContext(), String.valueOf(hasFocus),
-                        Toast.LENGTH_SHORT).show();
+                /*Toast.makeText(getBaseContext(), String.valueOf(hasFocus),
+                        Toast.LENGTH_SHORT).show();*/
             }
         });
+      search.setOnCloseListener(new SearchView.OnCloseListener() {
+          @Override
+          public boolean onClose() {
+              SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+              SharedPreferences.Editor editPre=pre.edit();
+              editPre.putInt(PRE_IN_TAB,IN_TAB);
+              editPre.commit();
+             refreshView();
 
+              return false;
+          }
+      });
         //*** setOnQueryTextListener ***
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // TODO Auto-generated method stub
-
+                searchKey = query;
                 SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
                 SharedPreferences.Editor editPre=pre.edit();
                 editPre.putInt(PRE_IN_TAB, Constants.tab_search);
                 editPre.commit();
-
+                VIDEOS_SEARCH = new ArrayList<VideoData>();
                  searchVideosByContent(query);
-                Toast.makeText(getBaseContext(), query,
-                        Toast.LENGTH_SHORT).show();
+              /*  Toast.makeText(getBaseContext(), query,
+                        Toast.LENGTH_SHORT).show();*/
 
                 return false;
             }
@@ -351,24 +362,27 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music_select));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-
-                     loadData(EN_PLAYLIST_ID_MUSIC,EN_PAGETOKEN_MUSIC);
+                     if (EN_VIDEOS_MUSIC.size() == 0)
+                         loadData(EN_PLAYLIST_ID_MUSIC,EN_PAGETOKEN_MUSIC);
+                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_MUSIC);
                  }
-
                  break;
              case Constants.tab_story:
                  if (location.equals("VN")) {
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story_select));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-
-                     loadData(VN_PLAYLIST_ID_STORY,VN_PAGETOKEN_STORY);
+                     if (VN_VIDEOS_STORY.size() == 0)
+                         loadData(VN_PLAYLIST_ID_STORY,VN_PAGETOKEN_STORY);
+                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_STORY);
                  } else
                  {
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story_select));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-                     loadData(EN_PLAYLIST_ID_STORY,EN_PAGETOKEN_STORY);
+                     if (EN_VIDEOS_STORY.size() == 0)
+                         loadData(EN_PLAYLIST_ID_STORY,EN_PAGETOKEN_STORY);
+                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_STORY);
                  }
                  break;
              case Constants.tab_cartoon:
@@ -376,18 +390,25 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon_select));
-                     loadData(VN_PLAYLIST_ID_CARTOON,VN_PLAYLIST_ID_CARTOON);
+                     if (VN_VIDEOS_CARTOON.size() == 0)
+                         loadData(VN_PLAYLIST_ID_CARTOON,VN_PAGETOKEN_CARTOON);
+                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_CARTOON);
                  } else
                  {
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon_select));
-                     loadData(EN_PLAYLIST_ID_CARTOON,EN_PAGETOKEN_CARTOON);
+                     if (EN_VIDEOS_CARTOON.size() == 0)
+                         loadData(EN_PLAYLIST_ID_CARTOON,EN_PAGETOKEN_CARTOON);
+                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_CARTOON);
                  }
                  break;
              default:
+
+
                  break;
          }
+        mVideosGridViewFragment.setScrollToTop();
     }
     public void onClick() {
          btnList.setOnClickListener(new View.OnClickListener() {
@@ -408,6 +429,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
           btnMusic.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View view) {
+                  IN_TAB = Constants.tab_music;
                   SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
                   SharedPreferences.Editor editPre=pre.edit();
                   editPre.putInt(PRE_IN_TAB,Constants.tab_music);
@@ -420,6 +442,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public void onClick(View view) {
                 SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
                 SharedPreferences.Editor editPre=pre.edit();
+                IN_TAB = Constants.tab_story;
                 editPre.putInt(PRE_IN_TAB,Constants.tab_story);
                 editPre.commit();
                 refreshView();
@@ -430,6 +453,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public void onClick(View view) {
                 SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
                 SharedPreferences.Editor editPre = pre.edit();
+                IN_TAB = Constants.tab_cartoon;
                 editPre.putInt(PRE_IN_TAB, Constants.tab_cartoon);
                 editPre.commit();
                 refreshView();
@@ -814,6 +838,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             String pageToken = "";
                            if (pilr.getNextPageToken()!=null)
                             pageToken = pilr.getNextPageToken();
+                            else return null;
 
 
                             // Get details of uploaded videos with a videos list
@@ -947,7 +972,6 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         setProgressBarIndeterminateVisibility(true);
         new AsyncTask<String, Void, List<VideoData>>() {
 
-
             @Override
             protected List<VideoData> doInBackground(String...playListId ) {
 
@@ -971,7 +995,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     }
                     if (pilr.getNextPageToken()!= null)
                     pageTokenSearch = pilr.getNextPageToken();
-                    else pageTokenSearch = "";
+                    else return null;
                     // Get details of uploaded videos with a videos list
                     // request.
                     VideoListResponse vlr = youtube.videos()
@@ -988,7 +1012,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                         }
                     }
 
-                    // Sort videos by title
+                  /*  // Sort videos by title
                     Collections.sort(videos, new Comparator<VideoData>() {
                         @Override
                         public int compare(VideoData videoData,
@@ -996,7 +1020,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             return videoData.getTitle().compareTo(
                                     videoData2.getTitle());
                         }
-                    });
+                    });*/
 
                             VIDEOS_SEARCH.addAll(videos);
                             return VIDEOS_SEARCH;
@@ -1012,17 +1036,16 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 } catch (IOException e) {
                     Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
                 }
-                return null;
+                return VIDEOS_SEARCH;
             }
 
             @Override
             protected void onPostExecute(List<VideoData> videos) {
                 setProgressBarIndeterminateVisibility(false);
-                Log.d("Size: ", "" + videos.size());
-                if (VIDEOS_SEARCH.size() <= 20) {
-                    mVideosGridViewFragment = new VideosGridViewFragment();
 
-                }
+             /*   if (videos == null) return;
+                Log.d("Size: ", "" + videos.size());*/
+
                 mVideosGridViewFragment.setIsLoading(false);
                 mVideosGridViewFragment.setVideos(videos);
             }
@@ -1098,7 +1121,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 }
                 break;
             case Constants.tab_search:
-                searchVideosByContent("");
+                if (VIDEOS_SEARCH.size()>300) return;
+                searchVideosByContent(searchKey);
 
                 break;
         }

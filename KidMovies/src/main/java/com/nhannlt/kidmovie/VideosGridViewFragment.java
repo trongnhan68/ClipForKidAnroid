@@ -47,6 +47,7 @@ import com.nhannlt.kidmovie.util.ImageWorker;
 import com.nhannlt.kidmovie.util.Utils;
 import com.nhannlt.kidmovie.util.VideoData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,7 +67,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     private boolean isLoading = false;
     ListVideoAdapter videoAdapter;
     public int currentFirstVisibleItem,currentVisibleItemCount,currentScrollState ;
-
+    TextView emptyView;
     public VideosGridViewFragment() {
 
     }
@@ -85,7 +86,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                              Bundle savedInstanceState) {
         View listView = inflater.inflate(R.layout.list_fragment, container, false);
         mGridView = (GridView) listView.findViewById(R.id.grid_view);
-        TextView emptyView = (TextView) listView.findViewById(android.R.id.empty);
+         emptyView = (TextView) listView.findViewById(android.R.id.empty);
         mGridView.setEmptyView(emptyView);
     return listView;
     }
@@ -96,7 +97,14 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         //setProfileInfo();
 
     }
+   public void setScrollToTop (){
 
+       if (mGridView != null)
+       {
+           mGridView.smoothScrollToPosition(0);
+
+       };
+   }
     public void setIsLoading (boolean isloading){
 
         this.isLoading = isloading;
@@ -105,6 +113,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         if (!isAdded()) {
             return;
         }
+
         if (videoAdapter == null) {
              videoAdapter = new ListVideoAdapter(videos);
 
@@ -113,8 +122,10 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                 isLoading = true;
         } else
         {
+            //mGridView.scrollTo(0,0);
             videoAdapter.setVideos(videos);
             videoAdapter.notifyDataSetChanged();
+
 
         }
 
@@ -125,9 +136,10 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
             {
                 if(firstVisibleItem + visibleItemCount >= totalItemCount && !isLoading) {
                     // End has been reached
-                    Log.d("GridView scroll: ", ""+firstVisibleItem + " " + visibleItemCount + " "+totalItemCount);
-                    mCallbacks.onLoadMore();
+                    Log.d("GridView scroll: ", "" + firstVisibleItem + " " + visibleItemCount + " " + totalItemCount);
                     isLoading = true;
+                    mCallbacks.onLoadMore();
+
                 }
             }
 
@@ -236,16 +248,18 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
     }
 
     private class ListVideoAdapter extends BaseAdapter {
-        private List<VideoData> mVideos;
+        private List<VideoData> mVideos = new ArrayList<VideoData>();
 
         private ListVideoAdapter(List<VideoData> videos) {
+           if (videos != null)
             mVideos = videos;
 
         }
         public void setVideos (List<VideoData> videos){
+            if (videos != null)
 
             this.mVideos = videos;
-
+           else  mVideos.clear();
         }
         @Override
         public int getCount() {
