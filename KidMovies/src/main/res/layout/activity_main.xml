@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg"
@@ -46,6 +47,24 @@
                 android:paddingLeft="@dimen/playerview_left"
                 android:paddingRight="@dimen/playerview_left"
                 android:paddingTop="@dimen/playerview_top" />
+           <RelativeLayout
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:paddingLeft="@dimen/playerview_left"
+               android:paddingTop="@dimen/playerview_top"
+               >
+               <com.google.android.gms.ads.AdView
+                   android:id="@+id/adView"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_centerHorizontal="true"
+
+                   android:layout_alignParentTop="true"
+                   ads:adSize="BANNER"
+                   ads:adUnitId="@string/banner_ad_unit_id">
+               </com.google.android.gms.ads.AdView>
+
+           </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/linear_listVideos"
@@ -67,7 +86,7 @@
                             android:layout_height="wrap_content"
 
                             android:background="@android:color/black"
-
+                            android:layout_marginRight="40dp"
                             />
                         <ImageButton
                             android:id="@+id/btn_music"
@@ -165,11 +184,16 @@
             />
         </LinearLayout>
     </LinearLayout>
+<FrameLayout
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="2.3">
+
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="2.3"
+
         android:orientation="vertical">
 
         <ImageButton
@@ -185,4 +209,32 @@
              />
 
     </LinearLayout>
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:orientation="vertical"
+       android:background="@android:color/black"
+       >
+       <TextView
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:text="MENU"
+           android:textSize="30dp"
+         android:textColor="@android:color/white"
+           android:gravity="center_horizontal"
+           android:textStyle="bold"
+           />
+
+
+    <ListView
+        android:id="@+id/listView_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        >
+
+
+    </ListView>
+   </LinearLayout>
+</FrameLayout>
 </LinearLayout>

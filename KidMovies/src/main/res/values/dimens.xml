@@ -11,5 +11,5 @@
     <dimen name="textview_video">14dp</dimen>
     <dimen name="playerview_left">15dp</dimen>
     <dimen name="playerview_top">12dp</dimen>
-    <dimen name="playerview_bottom">60dp</dimen>
+    <dimen name="playerview_bottom">70dp</dimen>
 </resources>

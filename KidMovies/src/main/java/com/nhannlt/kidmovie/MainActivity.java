@@ -51,6 +51,8 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -75,6 +77,7 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.google.api.services.youtube.model.VideoSnippet;
 import com.nhannlt.kidmovie.lazylist.ImageLoader;
 import com.nhannlt.kidmovie.util.ImageFetcher;
+import com.nhannlt.kidmovie.util.ListMenuAdapter;
 import com.nhannlt.kidmovie.util.ListViewAdapter;
 import com.nhannlt.kidmovie.util.Upload;
 import com.nhannlt.kidmovie.util.Utils;
@@ -103,7 +106,7 @@ import java.util.List;
  *         Main activity class which handles authorization and intents.
  */
 public class MainActivity extends Activity implements
-        VideosGridViewFragment.Callbacks, PlayerStateChangeListener, OnFullscreenListener, ListViewAdapter.CallbackFavoriteView {
+        VideosGridViewFragment.Callbacks, PlayerStateChangeListener, OnFullscreenListener, ListViewAdapter.CallbackFavoriteView, ListMenuAdapter.Callback {
     // private static final int MEDIA_TYPE_VIDEO = 7;
     private static final String YOUTUBE_FRAGMENT_TAG = "youtube";
     public  String TAG = "MAIN";
@@ -156,7 +159,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private ImageButton btnStory;
     private ImageButton btnCartoon;
     private TextView txtVideoName;
-
+    private ListView listViewMenu;
     private LinearLayout linearListVideos;
     private String EN_PLAYLIST_ID_MUSIC = "";
     private String EN_PLAYLIST_ID_STORY = "";
@@ -167,6 +170,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private String VN_PLAYLIST_ID_FAVORITE = "";
     private String EN_PLAYLIST_ID_FAVORITE = "";
     ListViewAdapter listAdapter;
+    ListMenuAdapter listMenuAdapter;
     List<VideoData> EN_VIDEOS_MUSIC,EN_VIDEOS_STORY,EN_VIDEOS_CARTOON,VN_VIDEOS_MUSIC,VN_VIDEOS_STORY,VN_VIDEOS_CARTOON,VIDEOS_SEARCH ;
     String pageTokenSearch="", EN_PAGETOKEN_MUSIC = "", EN_PAGETOKEN_STORY = "", EN_PAGETOKEN_CARTOON = "",
     VN_PAGETOKEN_MUSIC = "", VN_PAGETOKEN_STORY = "", VN_PAGETOKEN_CARTOON = "";
@@ -201,7 +205,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         } else {
             //super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
-           //getActionBar().hide();
+           getActionBar().hide();
 
 
 
@@ -223,14 +227,20 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     .findFragmentById(R.id.list_fragment);
             mListFavorite = (ListView) this.findViewById(R.id.listview_favorite);
 
-
+            listViewMenu = (ListView) this.findViewById(R.id.listView_menu);
+            listMenuAdapter = new ListMenuAdapter(this);
             listAdapter = new ListViewAdapter(this,mDBManager.loadallVideos(),heightScreen);
+            listViewMenu.setAdapter(listMenuAdapter);
 
             mListFavorite.setAdapter(listAdapter);
 
             new JSONAsyncTask().execute(BaseURLStringGit);
             initView();
             onClick();
+
+            AdView mAdView = (AdView) findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
         }
 
     }
@@ -259,6 +269,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     public void initView(){
 
          btnList = (ImageButton) this.findViewById(R.id.imgBtn_thuvien);
+        btnList.setSelected(true);
          btnMenu = (ImageButton) this.findViewById(R.id.imgBtn_menu);
         btnMusic = (ImageButton) this.findViewById(R.id.btn_music);
         btnCartoon = (ImageButton) this.findViewById(R.id.btn_cartoon);
@@ -338,7 +349,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public boolean onQueryTextChange(String newText) {
                 // TODO Auto-generated method stub
 
-                	Toast.makeText(getBaseContext(), newText, Toast.LENGTH_SHORT).show();
+                	//Toast.makeText(getBaseContext(), newText, Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -354,7 +365,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music_select));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-                  if (VN_VIDEOS_MUSIC.size() == 0)
+                  if (VN_VIDEOS_MUSIC.size() == 0 || !VN_PAGETOKEN_MUSIC.equals("end"))
                      loadData(VN_PLAYLIST_ID_MUSIC,VN_PAGETOKEN_MUSIC);
                      else mVideosGridViewFragment.setVideos(VN_VIDEOS_MUSIC);
                  } else
@@ -362,7 +373,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music_select));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-                     if (EN_VIDEOS_MUSIC.size() == 0)
+                     if (EN_VIDEOS_MUSIC.size() == 0 || !EN_PAGETOKEN_MUSIC.equals("end"))
                          loadData(EN_PLAYLIST_ID_MUSIC,EN_PAGETOKEN_MUSIC);
                      else mVideosGridViewFragment.setVideos(EN_VIDEOS_MUSIC);
                  }
@@ -372,7 +383,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story_select));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-                     if (VN_VIDEOS_STORY.size() == 0)
+                     if (VN_VIDEOS_STORY.size() == 0|| !VN_PAGETOKEN_STORY.equals("end"))
                          loadData(VN_PLAYLIST_ID_STORY,VN_PAGETOKEN_STORY);
                      else mVideosGridViewFragment.setVideos(VN_VIDEOS_STORY);
                  } else
@@ -380,7 +391,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story_select));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-                     if (EN_VIDEOS_STORY.size() == 0)
+                     if (EN_VIDEOS_STORY.size() == 0 || !EN_PAGETOKEN_STORY.equals("end"))
                          loadData(EN_PLAYLIST_ID_STORY,EN_PAGETOKEN_STORY);
                      else mVideosGridViewFragment.setVideos(EN_VIDEOS_STORY);
                  }
@@ -390,7 +401,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon_select));
-                     if (VN_VIDEOS_CARTOON.size() == 0)
+                     if (VN_VIDEOS_CARTOON.size() == 0 || !VN_PAGETOKEN_CARTOON.equals("end"))
                          loadData(VN_PLAYLIST_ID_CARTOON,VN_PAGETOKEN_CARTOON);
                      else mVideosGridViewFragment.setVideos(VN_VIDEOS_CARTOON);
                  } else
@@ -398,7 +409,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                      btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
                      btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
                      btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon_select));
-                     if (EN_VIDEOS_CARTOON.size() == 0)
+                     if (EN_VIDEOS_CARTOON.size() == 0 || !EN_PAGETOKEN_CARTOON.equals("end"))
                          loadData(EN_PLAYLIST_ID_CARTOON,EN_PAGETOKEN_CARTOON);
                      else mVideosGridViewFragment.setVideos(EN_VIDEOS_CARTOON);
                  }
@@ -692,11 +703,11 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                // loadData();
+                 refreshView();
                 break;
             case R.id.menu_accounts:
                 chooseAccount();
-                return true;
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -835,10 +846,13 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                                 videoIds.add(item.getContentDetails().getVideoId());
                             }
 
-                            String pageToken = "";
+                            String pageToken = "end";
                            if (pilr.getNextPageToken()!=null)
                             pageToken = pilr.getNextPageToken();
-                            else return null;
+                            else  {
+                               //EN_PAGETOKEN_MUSIC
+                              // return null;
+                           }
 
 
                             // Get details of uploaded videos with a videos list
@@ -1237,6 +1251,31 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
      };
 
         hideListVideo();
+
+    }
+
+    @Override
+    public void onSwitch(boolean status) {
+        //
+    }
+
+    @Override
+    public void onChooseAccount() {
+        chooseAccount();
+    }
+
+    @Override
+    public void onChangeContent() {
+
+    }
+
+    @Override
+    public void onAbout() {
+
+    }
+
+    @Override
+    public void onRemoveAd() {
 
     }
 
