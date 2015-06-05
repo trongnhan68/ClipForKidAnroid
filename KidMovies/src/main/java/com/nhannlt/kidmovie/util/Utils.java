@@ -103,7 +103,7 @@ public class Utils {
     private static void showErrorInternal(final Activity activity, final String errorMessage) {
         activity.runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
+              //  Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
             }
         });
     }

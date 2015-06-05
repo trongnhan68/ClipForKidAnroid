@@ -1,6 +1,7 @@
 package com.nhannlt.kidmovie.util;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,10 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.nhannlt.kidmovie.Constants;
 import com.nhannlt.kidmovie.R;
+
+import java.util.ArrayList;
 
 /**
  * Created by nhan on 6/3/2015.
@@ -18,9 +22,11 @@ public class ListMenuAdapter extends BaseAdapter {
 
     Context mContext;
     Callback mCallback;
-
+    String location = "";
+    ArrayList<String> listMenuItemName_VN , listMenuItemName_EN ;
     public ListMenuAdapter(Context mContext) {
         this.mContext = mContext;
+        initString();
         try {
             this.mCallback = ((Callback) mContext);
         } catch (ClassCastException e) {
@@ -32,11 +38,25 @@ public class ListMenuAdapter extends BaseAdapter {
 
         void onSwitch(boolean status);
         void onChooseAccount();
-        void onChangeContent();
+        void onChangeContent(String content);
         void onAbout();
         void onRemoveAd();
     }
+   public void initString(){
+       listMenuItemName_EN = new ArrayList<String>();
+       listMenuItemName_VN = new ArrayList<String>();
+       listMenuItemName_EN.add("Loop");
+       listMenuItemName_EN.add("Accounts");
+       listMenuItemName_EN.add("Remove Ad");
+       listMenuItemName_EN.add("Content: English");
+       listMenuItemName_EN.add("About");
+       listMenuItemName_VN.add("Lặp");
+       listMenuItemName_VN.add("Đăng Nhập");
+       listMenuItemName_VN.add("Bỏ quảng cáo");
+       listMenuItemName_VN.add("Nội dung:Tiếng Việt");
+       listMenuItemName_VN.add("About");
 
+   }
     @Override
     public int getCount() {
         return 5;
@@ -60,11 +80,20 @@ public class ListMenuAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(mContext).inflate(
                     R.layout.item_menu, container, false);
         }
+        ArrayList<String> mListItem = new ArrayList<String>();
+        SharedPreferences pre= mContext.getSharedPreferences("my_data", mContext.MODE_PRIVATE);
+         location = pre.getString(Constants.PRE_LOCATION, "EN");
+        if (location.equals("VN")) {
+            mListItem.addAll(listMenuItemName_VN);
+
+        } else {
+            mListItem.addAll(listMenuItemName_EN);
+        }
 
         switch (i) {
             case 0:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
-                        .setText("Loop");
+                        .setText(mListItem.get(0));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -76,7 +105,7 @@ public class ListMenuAdapter extends BaseAdapter {
                 break;
             case 1:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
-                        .setText("Accounts");
+                        .setText(mListItem.get(1));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -87,7 +116,7 @@ public class ListMenuAdapter extends BaseAdapter {
                 break;
             case 2:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
-                        .setText("Remove Ad");
+                        .setText(mListItem.get(2));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -98,12 +127,12 @@ public class ListMenuAdapter extends BaseAdapter {
                 break;
             case 3:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
-                        .setText("Content");
+                        .setText(mListItem.get(3));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
                 convertView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mCallback.onChangeContent();
+                        mCallback.onChangeContent(location);
                     }
                 });
                 break;

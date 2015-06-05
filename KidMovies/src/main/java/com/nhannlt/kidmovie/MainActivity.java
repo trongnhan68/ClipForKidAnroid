@@ -16,10 +16,12 @@ package com.nhannlt.kidmovie;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -110,7 +112,7 @@ public class MainActivity extends Activity implements
     // private static final int MEDIA_TYPE_VIDEO = 7;
     private static final String YOUTUBE_FRAGMENT_TAG = "youtube";
     public  String TAG = "MAIN";
-
+    AlertDialog dialog;
     public String searchKey = "";
     private YouTubePlayer mYouTubePlayer;
     private boolean mIsFullScreen = false;
@@ -126,13 +128,14 @@ public class MainActivity extends Activity implements
 //static NSString * const BaseURLStringDropBox_2 =@"https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
 public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?export=download&id=0B45IYpZpvVu-NGFqQXhEZmhVbVE";
     public static final String  BaseURLStringGit ="https://raw.githubusercontent.com/trongnhan68/Kid-Video/master/VideoJson.txt";
-
+    public static final String  BaseURLStringLocation ="http://www.geoplugin.net/json.gp";
     public static final String ACCOUNT_KEY = "accountName";
     public static final String MESSAGE_KEY = "message";
     public static final String YOUTUBE_ID = "youtubeId";
     public static final String YOUTUBE_WATCH_URL_PREFIX = "http://www.youtube.com/watch?v=";
     static final String REQUEST_AUTHORIZATION_INTENT = "com.nhannlt.kidmovie.RequestAuth";
     static final String REQUEST_AUTHORIZATION_INTENT_PARAM = "com.nhannlt.kidmovie.RequestAuth.param";
+
     private static final int REQUEST_GOOGLE_PLAY_SERVICES = 0;
     private static final int REQUEST_GMS_ERROR_DIALOG = 1;
     private static final int REQUEST_ACCOUNT_PICKER = 2;
@@ -153,6 +156,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private VideosGridViewFragment mVideosGridViewFragment;
     private VideosListViewFragment mVideosListViewFragment;
     private ListView mListFavorite;
+    private LinearLayout  linearMenu;
     private ImageButton btnList;
     private ImageButton btnMenu;
     private ImageButton btnMusic;
@@ -235,11 +239,14 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             mListFavorite.setAdapter(listAdapter);
 
             new JSONAsyncTask().execute(BaseURLStringGit);
+            new LocationAsynTask().execute(BaseURLStringLocation);
             initView();
             onClick();
 
             AdView mAdView = (AdView) findViewById(R.id.adView);
-            AdRequest adRequest = new AdRequest.Builder().build();
+            AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+
+
             mAdView.loadAd(adRequest);
         }
 
@@ -282,7 +289,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         VN_VIDEOS_STORY = new ArrayList<VideoData>();
         VN_VIDEOS_CARTOON = new ArrayList<VideoData>();
         VIDEOS_SEARCH = new ArrayList<VideoData>();
-
+        linearMenu = (LinearLayout) this.findViewById(R.id.linearMenu);
+        linearMenu.setVisibility(View.INVISIBLE);
         linearListVideos = (LinearLayout) this.findViewById(R.id.linear_listVideos);
 // init Preference
         SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
@@ -353,7 +361,30 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 return false;
             }
         });
+
+        // 1. Instantiate an AlertDialog.Builder with its constructor
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+// 2. Chain together various setter methods to set the dialog characteristics
+        builder.setMessage("Contact: Nguyen Le Trong Nhan.    Email: trongnhan68@gmail.com ").setNegativeButton(null,null)
+                .setTitle(R.string.about_string);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+                dialog.dismiss();
+            }
+        });
+// 3. Get the AlertDialog from create()
+         dialog = builder.create();
+
     }
+    public void refreshApp(){
+
+        if (listMenuAdapter != null) listMenuAdapter.notifyDataSetChanged();
+        refreshView();
+    }
+
     public void refreshView()
     {
         SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
@@ -441,9 +472,9 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
               @Override
               public void onClick(View view) {
                   IN_TAB = Constants.tab_music;
-                  SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-                  SharedPreferences.Editor editPre=pre.edit();
-                  editPre.putInt(PRE_IN_TAB,Constants.tab_music);
+                  SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                  SharedPreferences.Editor editPre = pre.edit();
+                  editPre.putInt(PRE_IN_TAB, Constants.tab_music);
                   editPre.commit();
                   refreshView();
               }
@@ -470,8 +501,66 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 refreshView();
             }
         });
-    }
+        btnMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!btnMenu.isSelected()) {
+                    showMenu();
+                    btnMenu.setSelected(true);
+                    Log.d("Main Log","Show menu View");
+                } else {
+                    hideMenu();
+                    btnMenu.setSelected(false);
+                    Log.d("Main Log","Hide menu View");
 
+                }
+            }
+        });
+    }
+    private void showMenu() {
+
+        //mVideosGridViewFragment.SetViewVisible();
+        // linearListVideos.
+        runOnUiThread(new Runnable() {
+            public void run() {
+                //* The Complete ProgressBar does not appear**/
+                linearMenu.setVisibility(View.VISIBLE);
+                linearMenu.animate()
+                        .translationX(0).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        btnMenu.setSelected(true);
+                    }
+                });
+
+            }
+        });
+
+    }
+    private void hideMenu() {
+
+        //mVideosGridViewFragment.SetViewVisible();
+        // linearListVideos.
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                //* The Complete ProgressBar does not appear**/
+                //linearListVideos.setVisibility(View.VISIBLE);
+
+                linearMenu.animate()
+                        .translationX(linearMenu.getWidth()).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        btnMenu.setSelected(false);
+                        linearMenu.setVisibility(View.INVISIBLE);
+                    }
+                });
+
+            }
+        });
+
+    }
     private void showListVideo() {
 
         //mVideosGridViewFragment.SetViewVisible();
@@ -1265,13 +1354,20 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     }
 
     @Override
-    public void onChangeContent() {
-
+    public void onChangeContent(String location) {
+        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre=pre.edit();
+        if (location.equals("VN"))
+        editPre.putString(PRE_LOCATION, "EN");
+        else
+            editPre.putString(PRE_LOCATION, "VN");
+        editPre.commit();
+        refreshApp();
     }
 
     @Override
     public void onAbout() {
-
+        dialog.show();
     }
 
     @Override
@@ -1342,6 +1438,69 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             }
         }
     }
+    class LocationAsynTask extends  AsyncTask <String , Void, Boolean> {
+
+
+        public LocationAsynTask() {
+            super();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... strings) {
+
+            try {
+
+                //------------------>>
+                HttpGet httppost = new HttpGet(strings[0]);
+                HttpClient httpclient = new DefaultHttpClient();
+                HttpResponse response = httpclient.execute(httppost);
+
+                // StatusLine stat = response.getStatusLine();
+                int status = response.getStatusLine().getStatusCode();
+
+                if (status == 200) {
+                    HttpEntity entity = response.getEntity();
+                    String data = EntityUtils.toString(entity);
+
+
+                    JSONObject jsono = new JSONObject(data);
+
+                    String location = jsono.getString("geoplugin_countryCode");
+                    if (location != null) {
+
+                        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+                        SharedPreferences.Editor editPre=pre.edit();
+                        editPre.putString(PRE_LOCATION, location);
+                        editPre.commit();
+                        //refreshApp();
+                    }
+
+
+                    return true;
+                }
+
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+
+                e.printStackTrace();
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+            if (aBoolean == true) refreshApp();
+        }
+    }
+
     class JSONAsyncTask extends AsyncTask<String, Void, Boolean> {
 
 

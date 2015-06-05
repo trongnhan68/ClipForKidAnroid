@@ -30,4 +30,7 @@ public class Constants {
     public static final int tab_story=2;
     public static final int tab_cartoon=3;
     public static final int tab_search=4;
+    public static final String PRE_IN_TAB = "IN_TAB";
+    public static final String PRE_REGISTED = "REGISTED";
+    public static final String PRE_LOCATION = "LOCATION";
 }

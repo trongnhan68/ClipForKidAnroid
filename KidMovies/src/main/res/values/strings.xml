@@ -38,13 +38,16 @@
     <string name="pick_one_of_your_videos_to_submit">Submit an existing YouTube video or upload a new video using the options below</string>
     <string name="no_videos_to_show_here_">No videos to show here.</string>
     <string name="avatar">avatar</string>
-    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
-    <!--<string name="banner_ad_unit_id">ca-app-pub-4657908714687860/4951287836</string>-->
+   <!-- <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>-->
+    <string name="banner_ad_unit_id">ca-app-pub-4657908714687860/4951287836</string>
     <string name="pick_or_record_a_video_to_upload">Upload an existing video from your device or record a new one</string>
     <string name="see_the_newly_uploaded_video">See the newly uploaded video</string>
     <string name="watch_your_video">Watch your video</string>
     <string name="video_submitted_to_ytdl">Video submitted to YTDL</string>
     <string name="playing_uploaded_video">Playing uploaded video</string>
     <string name="playing_the_video_in_upload_progress">Playing the video in upload progress</string>
+
+    <string name="about_string">Clip For Kid ver 1.0 </string>
+
 
 </resources>
