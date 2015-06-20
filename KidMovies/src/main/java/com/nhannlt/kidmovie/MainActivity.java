@@ -1,29 +1,13 @@
-/*
- * Copyright (c) 2013 Google Inc.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+
 
 package com.nhannlt.kidmovie;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
@@ -32,56 +16,53 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.v4.content.LocalBroadcastManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.OnFullscreenListener;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
 import com.google.android.youtube.player.YouTubePlayerFragment;
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.YouTubeRequestInitializer;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
-import com.google.api.services.youtube.model.VideoSnippet;
 import com.nhannlt.kidmovie.lazylist.ImageLoader;
 import com.nhannlt.kidmovie.util.ImageFetcher;
 import com.nhannlt.kidmovie.util.ListMenuAdapter;
 import com.nhannlt.kidmovie.util.ListViewAdapter;
-import com.nhannlt.kidmovie.util.Upload;
 import com.nhannlt.kidmovie.util.Utils;
 import com.nhannlt.kidmovie.util.VideoData;
 
@@ -97,7 +78,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -111,8 +91,9 @@ public class MainActivity extends Activity implements
         VideosGridViewFragment.Callbacks, PlayerStateChangeListener, OnFullscreenListener, ListViewAdapter.CallbackFavoriteView, ListMenuAdapter.Callback {
     // private static final int MEDIA_TYPE_VIDEO = 7;
     private static final String YOUTUBE_FRAGMENT_TAG = "youtube";
-    public  String TAG = "MAIN";
+    public String TAG = "MAIN";
     AlertDialog dialog;
+    RelativeLayout relativeAd;
     public String searchKey = "";
     private YouTubePlayer mYouTubePlayer;
     private boolean mIsFullScreen = false;
@@ -121,14 +102,18 @@ public class MainActivity extends Activity implements
     JSONArray myPlayLists_VN = new JSONArray();
     // String preference
     public static final String PRE_IN_TAB = "IN_TAB";
+    public static final String PRE_COUNT_CLICK = "COUNT_CLICK";
+
     public static final String PRE_REGISTED = "REGISTED";
     public static final String PRE_LOCATION = "LOCATION";
+    public static final String PRE_REPEAT = "REPEAT";
+
     // BaseURLString
-    public static final String  BaseURLStringDropBox_1 ="https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
-//static NSString * const BaseURLStringDropBox_2 =@"https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
-public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?export=download&id=0B45IYpZpvVu-NGFqQXhEZmhVbVE";
-    public static final String  BaseURLStringGit ="https://raw.githubusercontent.com/trongnhan68/Kid-Video/master/VideoJson.txt";
-    public static final String  BaseURLStringLocation ="http://www.geoplugin.net/json.gp";
+    public static final String BaseURLStringDropBox_1 = "https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
+    //static NSString * const BaseURLStringDropBox_2 =@"https://www.dropbox.com/s/msp70rmarezsjyw/VideoJson.txt?dl=1";
+    public static final String BaseURLStringGoogle = "https://drive.google.com/uc?export=download&id=0B45IYpZpvVu-T1ZKUUtGeVE1V2c";
+    public static final String BaseURLStringGit = "https://cdn.rawgit.com/trongnhan68/Kid-Video/master/VideoJson.txt";
+    public static final String BaseURLStringLocation = "http://www.geoplugin.net/json.gp";
     public static final String ACCOUNT_KEY = "accountName";
     public static final String MESSAGE_KEY = "message";
     public static final String YOUTUBE_ID = "youtubeId";
@@ -146,17 +131,17 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
     final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = new GsonFactory();
-    GoogleAccountCredential credential;
+
     private ImageFetcher mImageFetcher;
     private ImageLoader mImageLoader;
     private String mChosenAccountName;
     private Uri mFileURI = null;
     private VideoData mVideoData;
-    private UploadBroadcastReceiver broadcastReceiver;
+    // private UploadBroadcastReceiver broadcastReceiver;
     private VideosGridViewFragment mVideosGridViewFragment;
     private VideosListViewFragment mVideosListViewFragment;
     private ListView mListFavorite;
-    private LinearLayout  linearMenu;
+    private LinearLayout linearMenu;
     private ImageButton btnList;
     private ImageButton btnMenu;
     private ImageButton btnMusic;
@@ -175,27 +160,30 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     private String EN_PLAYLIST_ID_FAVORITE = "";
     ListViewAdapter listAdapter;
     ListMenuAdapter listMenuAdapter;
-    List<VideoData> EN_VIDEOS_MUSIC,EN_VIDEOS_STORY,EN_VIDEOS_CARTOON,VN_VIDEOS_MUSIC,VN_VIDEOS_STORY,VN_VIDEOS_CARTOON,VIDEOS_SEARCH ;
-    String pageTokenSearch="", EN_PAGETOKEN_MUSIC = "", EN_PAGETOKEN_STORY = "", EN_PAGETOKEN_CARTOON = "",
-    VN_PAGETOKEN_MUSIC = "", VN_PAGETOKEN_STORY = "", VN_PAGETOKEN_CARTOON = "";
+    List<VideoData> EN_VIDEOS_MUSIC, EN_VIDEOS_STORY, EN_VIDEOS_CARTOON, VN_VIDEOS_MUSIC, VN_VIDEOS_STORY, VN_VIDEOS_CARTOON, VIDEOS_SEARCH;
+    String pageTokenSearch = "", EN_PAGETOKEN_MUSIC = "", EN_PAGETOKEN_STORY = "", EN_PAGETOKEN_CARTOON = "",
+            VN_PAGETOKEN_MUSIC = "", VN_PAGETOKEN_STORY = "", VN_PAGETOKEN_CARTOON = "";
 
     SearchView search;
     private DBManager mDBManager;
-
+    public AdView mAdView;
     DisplayMetrics displaymetrics = new DisplayMetrics();
 
     private int IN_TAB = Constants.tab_music; // TAB 1: MUSIC, TAB 2: STORY, TAB3 CARTOON.
     public int heightScreen;
     public int widthScreen;
+    static final String ITEM_SKU = " android.purchased.removeads";
+    // IabHelper mHelper;
+    SQLiteDatabase database = null;
+    InterstitialAd mInterstitialAd;
 
-    SQLiteDatabase database=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
-        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-        SharedPreferences.Editor editPre=pre.edit();
-        editPre.putString(PRE_LOCATION,"EN"); // dummy
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
+        editPre.putString(PRE_LOCATION, "EN"); // dummy
         // init database
         mDBManager = new DBManager(this);
         mDBManager.doCreateTable();
@@ -209,23 +197,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         } else {
             //super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
-           getActionBar().hide();
+            getActionBar().hide();
 
-
-
-            credential = GoogleAccountCredential.usingOAuth2(
-                    getApplicationContext(), Arrays.asList(Auth.SCOPES));
-            // set exponential backoff policy
-            credential.setBackOff(new ExponentialBackOff());
-
-            if (savedInstanceState != null) {
-                mChosenAccountName = savedInstanceState.getString(ACCOUNT_KEY);
-
-            } else {
-                loadAccount();
-            }
-
-            credential.setSelectedAccountName(mChosenAccountName);
 
             mVideosGridViewFragment = (VideosGridViewFragment) getFragmentManager()
                     .findFragmentById(R.id.list_fragment);
@@ -233,21 +206,56 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
             listViewMenu = (ListView) this.findViewById(R.id.listView_menu);
             listMenuAdapter = new ListMenuAdapter(this);
-            listAdapter = new ListViewAdapter(this,mDBManager.loadallVideos(),heightScreen);
+            listAdapter = new ListViewAdapter(this, mDBManager.loadallVideos(), heightScreen);
             listViewMenu.setAdapter(listMenuAdapter);
 
             mListFavorite.setAdapter(listAdapter);
 
-            new JSONAsyncTask().execute(BaseURLStringGit);
+            new JSONAsyncTask().execute(BaseURLStringDropBox_1);
             new LocationAsynTask().execute(BaseURLStringLocation);
             initView();
             onClick();
 
-            AdView mAdView = (AdView) findViewById(R.id.adView);
-            AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR).build();
+            String android_id = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            mAdView = (AdView) findViewById(R.id.adView);
+
+            AdRequest adRequest = new AdRequest.Builder().addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    .build();
+
+            mInterstitialAd = new InterstitialAd(this);
+            mInterstitialAd.setAdUnitId("ca-app-pub-4657908714687860/7612742636");
+
+            requestNewInterstitial();
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    requestNewInterstitial();
 
 
-            mAdView.loadAd(adRequest);
+                }
+
+            });
+
+            boolean isRemovedAd = pre.getBoolean(Constants.PRE_REMOVE_AD, false);
+            if (!isRemovedAd)
+                mAdView.loadAd(adRequest);
+
+            /*String base64EncodedPublicKey ="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwlpaqV3qV+LUav+iYBVlVS5gar/5LB3ebHkC/WY222BY8Nu4H60YBLcsB8Ryo2+Ne+5FL941GaSys71XDWBA3q7CyeXXZf9smi8lYMyxiL4/Pf2ZPBe0ur+2lKSe9F9ttY7k3BDj3LhNdQFW8GYiKD34Sc9PCWDPiVpRYwBWrTD8fVMFB4tPIvkE4egtlBgAMoOD1qE9AD2zn8ccgENWtedGR8nAtq+Q1z0XLKl85B+uHJCOChTPvM/JM+D+fkWUMdmRYDmfNLJofAO7zWCePPLh2ApiMmQaTc1AauqV2d6CZ049UH/+lspDltveB0P7KAL0iTfrpfB2zprU1FRJcQIDAQAB";
+
+            mHelper = new IabHelper(this, base64EncodedPublicKey);
+
+            mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+                public void onIabSetupFinished(IabResult result) {
+                    if (!result.isSuccess()) {
+                        Log.d(TAG, "In-app Billing setup failed: " +
+                                result);
+                    } else {
+                        Log.d(TAG, "In-app Billing is set up OK");
+                    }
+                }
+            });*/
+
         }
 
     }
@@ -264,6 +272,15 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
      * @return true if the application is correctly configured for use, false if
      * not
      */
+
+    private void requestNewInterstitial() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .build();
+
+        mInterstitialAd.loadAd(adRequest);
+    }
+
     public static int getColorWithAlpha(int color, float ratio) {
         int newColor = 0;
         int alpha = Math.round(Color.alpha(color) * ratio);
@@ -273,11 +290,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         newColor = Color.argb(alpha, r, g, b);
         return newColor;
     }
-    public void initView(){
 
-         btnList = (ImageButton) this.findViewById(R.id.imgBtn_thuvien);
+    public void initView() {
+
+        btnList = (ImageButton) this.findViewById(R.id.imgBtn_thuvien);
         btnList.setSelected(true);
-         btnMenu = (ImageButton) this.findViewById(R.id.imgBtn_menu);
+        btnMenu = (ImageButton) this.findViewById(R.id.imgBtn_menu);
         btnMusic = (ImageButton) this.findViewById(R.id.btn_music);
         btnCartoon = (ImageButton) this.findViewById(R.id.btn_cartoon);
         btnStory = (ImageButton) this.findViewById(R.id.btn_funny);
@@ -292,13 +310,18 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         linearMenu = (LinearLayout) this.findViewById(R.id.linearMenu);
         linearMenu.setVisibility(View.INVISIBLE);
         linearListVideos = (LinearLayout) this.findViewById(R.id.linear_listVideos);
+        relativeAd = (RelativeLayout) this.findViewById(R.id.relative_ad);
+        relativeAd.bringToFront();
+        relativeAd.invalidate();
 // init Preference
-        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-        SharedPreferences.Editor editPre=pre.edit();
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
         editPre.putInt(PRE_IN_TAB, Constants.tab_music);
+
+        editPre.putInt(PRE_COUNT_CLICK, 1);
         txtVideoName.setMovementMethod(new ScrollingMovementMethod());
-        search=(SearchView) findViewById(R.id.searchView);
-        search.setBackgroundColor(getColorWithAlpha(Color.BLACK,0.5f));
+        search = (SearchView) findViewById(R.id.searchView);
+        search.setBackgroundColor(getColorWithAlpha(Color.BLACK, 0.5f));
 
         int searchTextViewId = search.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
         TextView searchTextView = (TextView) search.findViewById(searchTextViewId);
@@ -306,10 +329,10 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
         search.setQueryHint("Search View");
         search.setOnSearchClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-           // search.setBackgroundColor(Color.BLACK);
-          }
+            @Override
+            public void onClick(View view) {
+                // search.setBackgroundColor(Color.BLACK);
+            }
         });
         //*** setOnQueryTextFocusChangeListener ***
         search.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
@@ -322,18 +345,20 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                         Toast.LENGTH_SHORT).show();*/
             }
         });
-      search.setOnCloseListener(new SearchView.OnCloseListener() {
-          @Override
-          public boolean onClose() {
-              SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-              SharedPreferences.Editor editPre=pre.edit();
-              editPre.putInt(PRE_IN_TAB,IN_TAB);
-              editPre.commit();
-             refreshView();
+        search.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editPre = pre.edit();
+                editPre.putInt(PRE_IN_TAB, IN_TAB);
+                editPre.commit();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+                refreshView();
 
-              return false;
-          }
-      });
+                return false;
+            }
+        });
         //*** setOnQueryTextListener ***
         search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -341,12 +366,21 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public boolean onQueryTextSubmit(String query) {
                 // TODO Auto-generated method stub
                 searchKey = query;
-                SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-                SharedPreferences.Editor editPre=pre.edit();
+                SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editPre = pre.edit();
                 editPre.putInt(PRE_IN_TAB, Constants.tab_search);
                 editPre.commit();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+                VN_VIDEOS_MUSIC.clear();
+                VN_VIDEOS_STORY.clear();
+                VN_VIDEOS_CARTOON.clear();
+                VN_PAGETOKEN_MUSIC = "";
+                VN_PAGETOKEN_STORY = "";
+                VN_PAGETOKEN_CARTOON = "";
+                //mVideosListViewFragment.setVideos(VN_VIDEOS_MUSIC);
                 VIDEOS_SEARCH = new ArrayList<VideoData>();
-                 searchVideosByContent(query);
+                searchVideosByContent(query);
               /*  Toast.makeText(getBaseContext(), query,
                         Toast.LENGTH_SHORT).show();*/
 
@@ -357,7 +391,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             public boolean onQueryTextChange(String newText) {
                 // TODO Auto-generated method stub
 
-                	//Toast.makeText(getBaseContext(), newText, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), newText, Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -366,7 +400,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 // 2. Chain together various setter methods to set the dialog characteristics
-        builder.setMessage("Contact: Nguyen Le Trong Nhan.    Email: trongnhan68@gmail.com ").setNegativeButton(null,null)
+        builder.setMessage("Email: trongnhan68@gmail.com ").setNegativeButton(null, null)
                 .setTitle(R.string.about_string);
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -376,116 +410,156 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             }
         });
 // 3. Get the AlertDialog from create()
-         dialog = builder.create();
+        dialog = builder.create();
 
     }
-    public void refreshApp(){
+
+    public void refreshApp() {
 
         if (listMenuAdapter != null) listMenuAdapter.notifyDataSetChanged();
         refreshView();
     }
 
-    public void refreshView()
-    {
-        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-         String location = pre.getString(PRE_LOCATION, "EN");
-         int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
-         switch (inTab) {
-             case Constants.tab_music:
-                 if (location.equals("VN")) {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music_select));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-                  if (VN_VIDEOS_MUSIC.size() == 0 || !VN_PAGETOKEN_MUSIC.equals("end"))
-                     loadData(VN_PLAYLIST_ID_MUSIC,VN_PAGETOKEN_MUSIC);
-                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_MUSIC);
-                 } else
-                 {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music_select));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-                     if (EN_VIDEOS_MUSIC.size() == 0 || !EN_PAGETOKEN_MUSIC.equals("end"))
-                         loadData(EN_PLAYLIST_ID_MUSIC,EN_PAGETOKEN_MUSIC);
-                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_MUSIC);
-                 }
-                 break;
-             case Constants.tab_story:
-                 if (location.equals("VN")) {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story_select));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
-                     if (VN_VIDEOS_STORY.size() == 0|| !VN_PAGETOKEN_STORY.equals("end"))
-                         loadData(VN_PLAYLIST_ID_STORY,VN_PAGETOKEN_STORY);
-                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_STORY);
-                 } else
-                 {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story_select));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
-                     if (EN_VIDEOS_STORY.size() == 0 || !EN_PAGETOKEN_STORY.equals("end"))
-                         loadData(EN_PLAYLIST_ID_STORY,EN_PAGETOKEN_STORY);
-                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_STORY);
-                 }
-                 break;
-             case Constants.tab_cartoon:
-                 if (location.equals("VN")) {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon_select));
-                     if (VN_VIDEOS_CARTOON.size() == 0 || !VN_PAGETOKEN_CARTOON.equals("end"))
-                         loadData(VN_PLAYLIST_ID_CARTOON,VN_PAGETOKEN_CARTOON);
-                     else mVideosGridViewFragment.setVideos(VN_VIDEOS_CARTOON);
-                 } else
-                 {
-                     btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
-                     btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
-                     btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon_select));
-                     if (EN_VIDEOS_CARTOON.size() == 0 || !EN_PAGETOKEN_CARTOON.equals("end"))
-                         loadData(EN_PLAYLIST_ID_CARTOON,EN_PAGETOKEN_CARTOON);
-                     else mVideosGridViewFragment.setVideos(EN_VIDEOS_CARTOON);
-                 }
-                 break;
-             default:
+    public void refreshView() {
+       /* if (mImageLoader!=null) {
+
+            mImageLoader.clearCache();
+        }*/
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        String location = pre.getString(PRE_LOCATION, "EN");
+        int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
+        switch (inTab) {
+            case Constants.tab_music:
+                if (location.equals("VN")) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music_select));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
+                        }
+                    });
+
+                    if (VN_VIDEOS_MUSIC.size() == 0 || !VN_PAGETOKEN_MUSIC.equals("end"))
+                        loadData(VN_PLAYLIST_ID_MUSIC, VN_PAGETOKEN_MUSIC);
+                    else mVideosGridViewFragment.setVideos(VN_VIDEOS_MUSIC);
+                } else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music_select));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
+                        }
+                    });
+
+                    if (EN_VIDEOS_MUSIC.size() == 0 || !EN_PAGETOKEN_MUSIC.equals("end"))
+                        loadData(EN_PLAYLIST_ID_MUSIC, EN_PAGETOKEN_MUSIC);
+                    else mVideosGridViewFragment.setVideos(EN_VIDEOS_MUSIC);
+                }
+                break;
+            case Constants.tab_story:
+                if (location.equals("VN")) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story_select));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon));
+                        }
+                    });
+
+                    if (VN_VIDEOS_STORY.size() == 0 || !VN_PAGETOKEN_STORY.equals("end"))
+                        loadData(VN_PLAYLIST_ID_STORY, VN_PAGETOKEN_STORY);
+                    else mVideosGridViewFragment.setVideos(VN_VIDEOS_STORY);
+                } else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story_select));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon));
+                        }
+                    });
+
+                    if (EN_VIDEOS_STORY.size() == 0 || !EN_PAGETOKEN_STORY.equals("end"))
+                        loadData(EN_PLAYLIST_ID_STORY, EN_PAGETOKEN_STORY);
+                    else mVideosGridViewFragment.setVideos(EN_VIDEOS_STORY);
+                }
+                break;
+            case Constants.tab_cartoon:
+                if (location.equals("VN")) {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_music));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_story));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.vn_cartoon_select));
+                        }
+                    });
+
+                    if (VN_VIDEOS_CARTOON.size() == 0 || !VN_PAGETOKEN_CARTOON.equals("end"))
+                        loadData(VN_PLAYLIST_ID_CARTOON, VN_PAGETOKEN_CARTOON);
+                    else mVideosGridViewFragment.setVideos(VN_VIDEOS_CARTOON);
+                } else {
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            btnMusic.setBackground(getApplication().getResources().getDrawable(R.drawable.en_music));
+                            btnStory.setBackground(getApplication().getResources().getDrawable(R.drawable.en_story));
+                            btnCartoon.setBackground(getApplication().getResources().getDrawable(R.drawable.en_cartoon_select));
+                        }
+                    });
+
+                    if (EN_VIDEOS_CARTOON.size() == 0 || !EN_PAGETOKEN_CARTOON.equals("end"))
+                        loadData(EN_PLAYLIST_ID_CARTOON, EN_PAGETOKEN_CARTOON);
+                    else mVideosGridViewFragment.setVideos(EN_VIDEOS_CARTOON);
+                }
+                break;
+            default:
 
 
-                 break;
-         }
-        mVideosGridViewFragment.setScrollToTop();
+                break;
+        }
+        runOnUiThread(new Runnable() {
+            public void run() {
+                mVideosGridViewFragment.setScrollToTop();
+                relativeAd.bringToFront();
+                relativeAd.invalidate();
+            }
+        });
+
+
     }
-    public void onClick() {
-         btnList.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 if (!btnList.isSelected()) {
-                     showListVideo();
-                     btnList.setSelected(true);
-                     Log.d("Main Log","Show List View");
-                 } else {
-                     hideListVideo();
-                     btnList.setSelected(false);
-                     Log.d("Main Log","Hide List View");
 
-                 }
-             }
-         });
-          btnMusic.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View view) {
-                  IN_TAB = Constants.tab_music;
-                  SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
-                  SharedPreferences.Editor editPre = pre.edit();
-                  editPre.putInt(PRE_IN_TAB, Constants.tab_music);
-                  editPre.commit();
-                  refreshView();
-              }
-          });
+    public void onClick() {
+        btnList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!btnList.isSelected()) {
+                    showListVideo();
+                    btnList.setSelected(true);
+                    Log.d("Main Log", "Show List View");
+                } else {
+                    hideListVideo();
+                    btnList.setSelected(false);
+                    Log.d("Main Log", "Hide List View");
+
+                }
+            }
+        });
+        btnMusic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IN_TAB = Constants.tab_music;
+                SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editPre = pre.edit();
+                editPre.putInt(PRE_IN_TAB, Constants.tab_music);
+                editPre.commit();
+                refreshView();
+            }
+        });
         btnStory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-                SharedPreferences.Editor editPre=pre.edit();
+                SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                SharedPreferences.Editor editPre = pre.edit();
                 IN_TAB = Constants.tab_story;
-                editPre.putInt(PRE_IN_TAB,Constants.tab_story);
+                editPre.putInt(PRE_IN_TAB, Constants.tab_story);
                 editPre.commit();
                 refreshView();
             }
@@ -507,16 +581,18 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 if (!btnMenu.isSelected()) {
                     showMenu();
                     btnMenu.setSelected(true);
-                    Log.d("Main Log","Show menu View");
+                    Log.d("Main Log", "Show menu View");
                 } else {
                     hideMenu();
                     btnMenu.setSelected(false);
-                    Log.d("Main Log","Hide menu View");
+                    Log.d("Main Log", "Hide menu View");
 
                 }
+
             }
         });
     }
+
     private void showMenu() {
 
         //mVideosGridViewFragment.SetViewVisible();
@@ -538,6 +614,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         });
 
     }
+
     private void hideMenu() {
 
         //mVideosGridViewFragment.SetViewVisible();
@@ -561,6 +638,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         });
 
     }
+
     private void showListVideo() {
 
         //mVideosGridViewFragment.SetViewVisible();
@@ -604,9 +682,10 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
 
     }
-    public void panToVideo(final String youtubeId, final  String youtubeName) {
 
-       if (youtubeName!=null) txtVideoName.setText(youtubeName);
+    public void panToVideo(final String youtubeId, final String youtubeName) {
+
+        if (youtubeName != null) txtVideoName.setText(youtubeName);
         popPlayerFromBackStack();
         YouTubePlayerFragment playerFragment = YouTubePlayerFragment
                 .newInstance();
@@ -623,6 +702,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             YouTubePlayer.Provider provider,
                             YouTubePlayer youTubePlayer, boolean b) {
                         youTubePlayer.loadVideo(youtubeId);
+                        //youTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.CHROMELESS.);
+
                         mYouTubePlayer = youTubePlayer;
                         youTubePlayer
                                 .setPlayerStateChangeListener(MainActivity.this);
@@ -638,6 +719,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     }
                 });
     }
+
     public boolean popPlayerFromBackStack() {
         if (mIsFullScreen) {
             mYouTubePlayer.setFullscreen(false);
@@ -649,6 +731,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         }
         return true;
     }
+
     private boolean isCorrectlyConfigured() {
         // This isn't going to internationalize well, but we only really need
         // this for the sample app.
@@ -719,13 +802,18 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (broadcastReceiver == null)
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        boolean isRemovedAd = pre.getBoolean(Constants.PRE_REMOVE_AD, false);
+        if (isRemovedAd)
+            mAdView.destroy();
+     /*   if (broadcastReceiver == null)
             broadcastReceiver = new UploadBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter(
                 REQUEST_AUTHORIZATION_INTENT);
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                broadcastReceiver, intentFilter);
+                broadcastReceiver, intentFilter);*/
+
+
     }
 
     private void ensureFetcher() {
@@ -736,52 +824,56 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                             "cache"));
         }
     }
+
     private void ensureLoader() {
         if (mImageLoader == null) {
             mImageLoader = new ImageLoader(this.getApplicationContext());
 
         }
     }
+
     private void loadAccount() {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         mChosenAccountName = sp.getString(ACCOUNT_KEY, null);
         //if (mChosenAccountName==null) chooseAccount();
-        invalidateOptionsMenu();
+        // invalidateOptionsMenu();
     }
 
     private void saveAccount() {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(this);
         sp.edit().putString(ACCOUNT_KEY, mChosenAccountName).commit();
-        new JSONAsyncTask().execute(BaseURLStringGit);
+
+        //refreshApp();
+        new JSONAsyncTask().execute(BaseURLStringDropBox_1);
         //refreshView();
     }
 
     private void loadData(String playListId, String pageToken) {
-        if (mChosenAccountName == null) {
+        /*if (mChosenAccountName == null) {
             return;
-        }
-        if (mImageLoader!=null) {
+        }*/
+        if (mImageLoader != null) {
 
             mImageLoader.clearCache();
         }
-        loadVideosByPlayListId(playListId, 0,pageToken);
+        loadVideosByPlayListId(playListId, 0, pageToken);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (broadcastReceiver != null) {
+        /*if (broadcastReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(
                     broadcastReceiver);
-        }
+        }*/
         if (isFinishing()) {
             // mHandler.removeCallbacksAndMessages(null);
         }
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -795,11 +887,11 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                  refreshView();
                 break;
             case R.id.menu_accounts:
-                chooseAccount();
+               // chooseAccount();
                 break;
         }
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -807,64 +899,51 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         switch (requestCode) {
             case REQUEST_GMS_ERROR_DIALOG:
                 break;
-            case RESULT_PICK_IMAGE_CROP:
-                if (resultCode == RESULT_OK) {
-                    mFileURI = data.getData();
-                    if (mFileURI != null) {
-                        Intent intent = new Intent(this, ReviewActivity.class);
-                        intent.setData(mFileURI);
-                        startActivity(intent);
-                    }
-                }
-                break;
 
-            case RESULT_VIDEO_CAP:
-                if (resultCode == RESULT_OK) {
-                    mFileURI = data.getData();
-                    if (mFileURI != null) {
-                        Intent intent = new Intent(this, ReviewActivity.class);
-                        intent.setData(mFileURI);
-                        startActivity(intent);
-                    }
-                }
-                break;
-            case REQUEST_GOOGLE_PLAY_SERVICES:
+           /* case REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode == Activity.RESULT_OK) {
                     haveGooglePlayServices();
                 } else {
                     checkGooglePlayServicesAvailable();
                 }
-                break;
-            case REQUEST_AUTHORIZATION:
-                if (resultCode != Activity.RESULT_OK) {
-                    chooseAccount();
-                }
-                break;
-            case REQUEST_ACCOUNT_PICKER:
-                if (resultCode == Activity.RESULT_OK && data != null
-                        && data.getExtras() != null) {
-                    String accountName = data.getExtras().getString(
-                            AccountManager.KEY_ACCOUNT_NAME);
-                    if (accountName != null) {
-                        mChosenAccountName = accountName;
-                        credential.setSelectedAccountName(accountName);
-                        saveAccount();
-                    }
-                }
-                break;
-            case REQUEST_DIRECT_TAG:
-                if (resultCode == Activity.RESULT_OK && data != null
-                        && data.getExtras() != null) {
-                    String youtubeId = data.getStringExtra(YOUTUBE_ID);
-                    if (youtubeId.equals(mVideoData.getYouTubeId())) {
-                        directTag(mVideoData);
-                    }
-                }
-                break;
+                break;*/
+
         }
+       /* if (!mHelper.handleActivityResult(requestCode,
+                resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }*/
+    }
+   /* public void consumeItem() {
+        mHelper.queryInventoryAsync(mReceivedInventoryListener);
     }
 
-    private void directTag(final VideoData video) {
+    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+            = new IabHelper.QueryInventoryFinishedListener() {
+        public void onQueryInventoryFinished(IabResult result,
+                                             Inventory inventory) {
+
+            if (result.isFailure()) {
+                // Handle failure
+            } else {
+                mHelper.consumeAsync(inventory.getPurchase(ITEM_SKU),
+                        mConsumeFinishedListener);
+            }
+        }
+    };
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+            new IabHelper.OnConsumeFinishedListener() {
+                public void onConsumeFinished(Purchase purchase,
+                                              IabResult result) {
+
+                    if (result.isSuccess()) {
+                        //clickButton.setEnabled(true);
+                    } else {
+                        // handle error
+                    }
+                }
+            };*/
+ /*   private void directTag(final VideoData video) {
         final Video updateVideo = new Video();
         VideoSnippet snippet = video
                 .addTags(Arrays.asList(
@@ -894,7 +973,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         Toast.makeText(this,
                 R.string.video_submitted_to_ytdl, Toast.LENGTH_LONG)
                 .show();
-    }
+    }*/
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -903,127 +982,126 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     }
 
     private void loadVideosByPlayListId(String playListId, final int type, final String pageTokenNext) {
-                if (mChosenAccountName == null) {
+               /* if (mChosenAccountName == null) {
                     chooseAccount();
                     return;
-                }
+                }*/
 
-                setProgressBarIndeterminateVisibility(true);
-                new AsyncTask<String, Void, List<VideoData>>() {
+        setProgressBarIndeterminateVisibility(true);
+        new AsyncTask<String, Void, List<VideoData>>() {
 
-                List<VideoData> videos = new ArrayList<VideoData>();
+            List<VideoData> videos = new ArrayList<VideoData>();
 
-                    @Override
-                    protected List<VideoData> doInBackground(String...playListId ) {
+            @Override
+            protected List<VideoData> doInBackground(String... playListId) {
 
-                        YouTube youtube = new YouTube.Builder(transport, jsonFactory,
-                                credential).setApplicationName(Constants.APP_NAME)
-                                .build();
-
-                        try {
-
-
-                            PlaylistItemListResponse pilr = youtube.playlistItems()
-                                    .list("id,contentDetails")
-                                    .setPlaylistId(playListId[0].toString()).setPageToken(pageTokenNext)
-                                    .setMaxResults(20l).execute();
-                            List<String> videoIds = new ArrayList<String>();
-
-                            // Iterate over playlist item list response to get uploaded
-                            // videos' ids.
-                            for (PlaylistItem item : pilr.getItems()) {
-                                videoIds.add(item.getContentDetails().getVideoId());
-                            }
-
-                            String pageToken = "end";
-                           if (pilr.getNextPageToken()!=null)
-                            pageToken = pilr.getNextPageToken();
-                            else  {
-                               //EN_PAGETOKEN_MUSIC
-                              // return null;
-                           }
-
-
-                            // Get details of uploaded videos with a videos list
-                            // request.
-                            VideoListResponse vlr = youtube.videos()
-                                    .list("id,snippet,status,contentDetails")
-                                    .setId(TextUtils.join(",", videoIds)).execute();
-
-                            // Add only the public videos to the local videos list.
-                            for (Video video : vlr.getItems()) {
-                                if ("public".equals(video.getStatus()
-                                        .getPrivacyStatus())) {
-                                    VideoData videoData = new VideoData();
-                                    videoData.setVideo(video);
-                                    videos.add(videoData);
-                                }
-                            }
-
-                            // Sort videos by title
-                            Collections.sort(videos, new Comparator<VideoData>() {
-                                @Override
-                                public int compare(VideoData videoData,
-                                                   VideoData videoData2) {
-                                    return videoData.getTitle().compareTo(
-                                            videoData2.getTitle());
-                                }
-                            });
-                        if (type == 0 ) {
-                            SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
-                            String location = pre.getString(PRE_LOCATION, "EN");
-                            int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
-                            switch (inTab) {
-                                case Constants.tab_music:
-                                    if (location.equals("VN")) {
-                                        VN_PAGETOKEN_MUSIC = pageToken;
-                                        VN_VIDEOS_MUSIC.addAll(videos);
-                                        return VN_VIDEOS_MUSIC;
-
-                                    } else {
-                                        EN_PAGETOKEN_MUSIC = pageToken;
-                                        EN_VIDEOS_MUSIC.addAll(videos);
-                                        return EN_VIDEOS_MUSIC;
-                                    }
-
-                                case Constants.tab_story:
-                                    if (location.equals("VN")) {
-                                        VN_PAGETOKEN_STORY = pageToken;
-                                        VN_VIDEOS_STORY.addAll(videos);
-                                        return VN_VIDEOS_STORY;
-                                    } else {
-                                        EN_PAGETOKEN_STORY = pageToken;
-                                        EN_VIDEOS_STORY.addAll(videos);
-                                        return EN_VIDEOS_STORY;
-                                    }
-
-                                case Constants.tab_cartoon:
-                                    if (location.equals("VN")) {
-                                        VN_PAGETOKEN_CARTOON = pageToken;
-                                        VN_VIDEOS_CARTOON.addAll(videos);
-                                        return VN_VIDEOS_CARTOON;
-                                    } else {
-                                        EN_PAGETOKEN_CARTOON = pageToken;
-                                        EN_VIDEOS_CARTOON.addAll(videos);
-                                        return EN_VIDEOS_CARTOON;
-                                    }
-
+                YouTube youtube = new YouTube.Builder(transport, jsonFactory,
+                        new HttpRequestInitializer() {
+                            @Override
+                            public void initialize(HttpRequest httpRequest) throws IOException {
                             }
                         }
-                            return videos;
+                ).setYouTubeRequestInitializer(new YouTubeRequestInitializer(Auth.KEY)
+                ).setApplicationName(Constants.APP_NAME)
+                        .build();
 
-                        } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
-                            showGooglePlayServicesAvailabilityErrorDialog(availabilityException
-                                    .getConnectionStatusCode());
-                        } catch (UserRecoverableAuthIOException userRecoverableException) {
-                            startActivityForResult(
-                                    userRecoverableException.getIntent(),
-                                    REQUEST_AUTHORIZATION);
-                        } catch (IOException e) {
-                            Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
-                        }
-                        return null;
+                try {
+
+
+                    PlaylistItemListResponse pilr = youtube.playlistItems()
+                            .list("id,contentDetails")
+                            .setPlaylistId(playListId[0].toString()).setPageToken(pageTokenNext)
+                            .setMaxResults(20l).execute();
+                    List<String> videoIds = new ArrayList<String>();
+
+                    // Iterate over playlist item list response to get uploaded
+                    // videos' ids.
+                    for (PlaylistItem item : pilr.getItems()) {
+                        videoIds.add(item.getContentDetails().getVideoId());
                     }
+
+                    String pageToken = "end";
+                    if (pilr.getNextPageToken() != null)
+                        pageToken = pilr.getNextPageToken();
+                    else {
+                        //EN_PAGETOKEN_MUSIC
+                        // return null;
+                    }
+
+
+                    // Get details of uploaded videos with a videos list
+                    // request.
+                    VideoListResponse vlr = youtube.videos()
+                            .list("id,snippet,status,contentDetails")
+                            .setId(TextUtils.join(",", videoIds)).execute();
+
+                    // Add only the public videos to the local videos list.
+                    for (Video video : vlr.getItems()) {
+                        if ("public".equals(video.getStatus()
+                                .getPrivacyStatus())) {
+                            VideoData videoData = new VideoData();
+                            videoData.setVideo(video);
+                            videos.add(videoData);
+                        }
+                    }
+
+                    // Sort videos by title
+                    Collections.sort(videos, new Comparator<VideoData>() {
+                        @Override
+                        public int compare(VideoData videoData,
+                                           VideoData videoData2) {
+                            return videoData.getTitle().compareTo(
+                                    videoData2.getTitle());
+                        }
+                    });
+                    if (type == 0) {
+                        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                        String location = pre.getString(PRE_LOCATION, "EN");
+                        int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
+                        switch (inTab) {
+                            case Constants.tab_music:
+                                if (location.equals("VN")) {
+                                    VN_PAGETOKEN_MUSIC = pageToken;
+                                    VN_VIDEOS_MUSIC.addAll(videos);
+                                    return VN_VIDEOS_MUSIC;
+
+                                } else {
+                                    EN_PAGETOKEN_MUSIC = pageToken;
+                                    EN_VIDEOS_MUSIC.addAll(videos);
+                                    return EN_VIDEOS_MUSIC;
+                                }
+
+                            case Constants.tab_story:
+                                if (location.equals("VN")) {
+                                    VN_PAGETOKEN_STORY = pageToken;
+                                    VN_VIDEOS_STORY.addAll(videos);
+                                    return VN_VIDEOS_STORY;
+                                } else {
+                                    EN_PAGETOKEN_STORY = pageToken;
+                                    EN_VIDEOS_STORY.addAll(videos);
+                                    return EN_VIDEOS_STORY;
+                                }
+
+                            case Constants.tab_cartoon:
+                                if (location.equals("VN")) {
+                                    VN_PAGETOKEN_CARTOON = pageToken;
+                                    VN_VIDEOS_CARTOON.addAll(videos);
+                                    return VN_VIDEOS_CARTOON;
+                                } else {
+                                    EN_PAGETOKEN_CARTOON = pageToken;
+                                    EN_VIDEOS_CARTOON.addAll(videos);
+                                    return EN_VIDEOS_CARTOON;
+                                }
+
+                        }
+                    }
+                    return videos;
+
+                } catch (IOException e) {
+                    Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
+                }
+                return null;
+            }
 
             @Override
             protected void onPostExecute(List<VideoData> videos) {
@@ -1032,54 +1110,61 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                 if (videos == null) {
                     return;
                 }
-            if (type == 0 ) { // get videos in playlist
+                if (type == 0) { // get videos in playlist
 
 
-                mVideosGridViewFragment.setIsLoading(false);
-                mVideosGridViewFragment.setVideos(videos);
-            } else {  // get favorite videos
-                //mVideosListViewFragment.setVideos(videos);
-                if (listAdapter!=null)
-                    if (listAdapter.getCount() < 1) {
-                List<FavoriteData> favoriteVideos = new ArrayList<FavoriteData>();
-                for (int i=0;i<videos.size();i++) {
-                    FavoriteData mDataFavorite = new FavoriteData();
-                    mDataFavorite.setVideoId(videos.get(i).getYouTubeId());
-                    mDataFavorite.setVideoName(videos.get(i).getTitle());
-                    mDataFavorite.setVideoUrl(videos.get(i).getThumbUri());
-                    mDataFavorite.setVideoDuration(videos.get(i).getVideo().getContentDetails().getDuration());
-                    mDataFavorite.setVideoPosition(0);
-                    favoriteVideos.add(mDataFavorite);
-                    if (mDBManager.doInsertRecord(mDataFavorite)) {
-                       //Log.d("add new video ", " " +mDataFavorite.getVideoName());
-                    };
+                    mVideosGridViewFragment.setIsLoading(false);
+                    mVideosGridViewFragment.setVideos(videos);
+                } else {  // get favorite videos
+                    //mVideosListViewFragment.setVideos(videos);
+                    if (listAdapter != null)
+                        if (listAdapter.getCount() < 1) {
+                            List<FavoriteData> favoriteVideos = new ArrayList<FavoriteData>();
+                            for (int i = 0; i < videos.size(); i++) {
+                                FavoriteData mDataFavorite = new FavoriteData();
+                                mDataFavorite.setVideoId(videos.get(i).getYouTubeId());
+                                mDataFavorite.setVideoName(videos.get(i).getTitle());
+                                mDataFavorite.setVideoUrl(videos.get(i).getThumbUri());
+                                mDataFavorite.setVideoDuration(videos.get(i).getVideo().getContentDetails().getDuration());
+                                mDataFavorite.setVideoPosition(0);
+                                favoriteVideos.add(mDataFavorite);
+                                if (mDBManager.doInsertRecord(mDataFavorite)) {
+                                    //Log.d("add new video ", " " +mDataFavorite.getVideoName());
+                                }
+                                ;
 
-                }
-                        List<FavoriteData> favoritevideoDB = new ArrayList<FavoriteData>();
-                        favoritevideoDB = mDBManager.loadallVideos();
+                            }
+                            List<FavoriteData> favoritevideoDB = new ArrayList<FavoriteData>();
+                            favoritevideoDB = mDBManager.loadallVideos();
                             listAdapter.setVideos(favoritevideoDB);
                             listAdapter.notifyDataSetChanged();
-                    }
+                        }
 
-                }}
+                }
+            }
 
         }.execute(playListId);
     }
+
     private void searchVideosByContent(final String content) {
-        if (mChosenAccountName == null) {
+      /*  if (mChosenAccountName == null) {
             chooseAccount();
             return;
-        }
-
-
+        }*/
         setProgressBarIndeterminateVisibility(true);
         new AsyncTask<String, Void, List<VideoData>>() {
 
             @Override
-            protected List<VideoData> doInBackground(String...playListId ) {
+            protected List<VideoData> doInBackground(String... playListId) {
 
                 YouTube youtube = new YouTube.Builder(transport, jsonFactory,
-                        credential).setApplicationName(Constants.APP_NAME)
+                        new HttpRequestInitializer() {
+                            @Override
+                            public void initialize(HttpRequest httpRequest) throws IOException {
+                            }
+                        }
+                ).setYouTubeRequestInitializer(new YouTubeRequestInitializer(Auth.KEY)
+                ).setApplicationName(Constants.APP_NAME)
                         .build();
 
                 try {
@@ -1093,11 +1178,17 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
                     // Iterate over playlist item list response to get uploaded
                     // videos' ids.
-                    for (SearchResult item : pilr.getItems()) {
-                        videoIds.add(item.getId().getVideoId());
+                    if (pilr.getItems().size() > 0) {
+                        for (SearchResult item : pilr.getItems()) {
+                            if (item != null)
+                                videoIds.add(item.getId().getVideoId());
+                        }
+
+                    } else {
+                        return null;
                     }
-                    if (pilr.getNextPageToken()!= null)
-                    pageTokenSearch = pilr.getNextPageToken();
+                    if (pilr.getNextPageToken() != null)
+                        pageTokenSearch = pilr.getNextPageToken();
                     else return null;
                     // Get details of uploaded videos with a videos list
                     // request.
@@ -1115,27 +1206,10 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                         }
                     }
 
-                  /*  // Sort videos by title
-                    Collections.sort(videos, new Comparator<VideoData>() {
-                        @Override
-                        public int compare(VideoData videoData,
-                                           VideoData videoData2) {
-                            return videoData.getTitle().compareTo(
-                                    videoData2.getTitle());
-                        }
-                    });*/
-
-                            VIDEOS_SEARCH.addAll(videos);
-                            return VIDEOS_SEARCH;
+                    VIDEOS_SEARCH.addAll(videos);
+                    return VIDEOS_SEARCH;
 
 
-                } catch (final GooglePlayServicesAvailabilityIOException availabilityException) {
-                    showGooglePlayServicesAvailabilityErrorDialog(availabilityException
-                            .getConnectionStatusCode());
-                } catch (UserRecoverableAuthIOException userRecoverableException) {
-                    startActivityForResult(
-                            userRecoverableException.getIntent(),
-                            REQUEST_AUTHORIZATION);
                 } catch (IOException e) {
                     Utils.logAndShow(MainActivity.this, Constants.APP_NAME, e);
                 }
@@ -1155,6 +1229,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
         }.execute(content);
     }
+
     @Override
     public void onBackPressed() {
         // if (mDirectFragment.popPlayerFromBackStack()) {
@@ -1167,6 +1242,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         ensureFetcher();
         return mImageFetcher;
     }
+
     @Override
     public ImageLoader onGetImageLoader() {
         ensureLoader();
@@ -1176,7 +1252,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     @Override
     public void onVideoSelected(VideoData video) {
         mVideoData = video;
-        panToVideo(video.getYouTubeId(),video.getTitle());
+        Log.d(TAG, video.getYouTubeId());
+        panToVideo(video.getYouTubeId(), video.getTitle());
 
         hideListVideo();
         FavoriteData mFavoriteData = new FavoriteData();
@@ -1189,42 +1266,58 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
             List<FavoriteData> videos = new ArrayList<FavoriteData>();
             videos = mDBManager.loadallVideos();
-            if (listAdapter!=null) {
+            if (listAdapter != null) {
                 listAdapter.setVideos(videos);
                 listAdapter.notifyDataSetChanged();
             }
         }
+
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
+        int count = pre.getInt(PRE_COUNT_CLICK, 0);
+        count = count + 1;
+        editPre.putInt(PRE_COUNT_CLICK, count);
+        if (count > 1000) editPre.putInt(PRE_COUNT_CLICK, 1);
+        editPre.commit();
+        if (count % 5 == 0) {
+            if (mInterstitialAd.isLoaded()) {
+                mInterstitialAd.show();
+            } else {
+                //beginPlayingGame();
+            }
+        }
+
     }
 
     @Override
     public void onLoadMore() {
-        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
         String location = pre.getString(PRE_LOCATION, "EN");
         int inTab = pre.getInt(PRE_IN_TAB, IN_TAB);
         switch (inTab) {
             case Constants.tab_music:
                 if (location.equals("VN")) {
-                    loadVideosByPlayListId(VN_PLAYLIST_ID_MUSIC,0,VN_PAGETOKEN_MUSIC);
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_MUSIC, 0, VN_PAGETOKEN_MUSIC);
                 } else {
-                    loadVideosByPlayListId(EN_PLAYLIST_ID_MUSIC,0,EN_PAGETOKEN_MUSIC);
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_MUSIC, 0, EN_PAGETOKEN_MUSIC);
                 }
                 break;
             case Constants.tab_story:
                 if (location.equals("VN")) {
-                    loadVideosByPlayListId(VN_PLAYLIST_ID_STORY,0,VN_PAGETOKEN_STORY);
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_STORY, 0, VN_PAGETOKEN_STORY);
                 } else {
-                    loadVideosByPlayListId(EN_PLAYLIST_ID_STORY,0,EN_PAGETOKEN_STORY);
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_STORY, 0, EN_PAGETOKEN_STORY);
                 }
                 break;
             case Constants.tab_cartoon:
                 if (location.equals("VN")) {
-                    loadVideosByPlayListId(VN_PLAYLIST_ID_CARTOON,0,VN_PAGETOKEN_CARTOON);
+                    loadVideosByPlayListId(VN_PLAYLIST_ID_CARTOON, 0, VN_PAGETOKEN_CARTOON);
                 } else {
-                    loadVideosByPlayListId(EN_PLAYLIST_ID_CARTOON,0,EN_PAGETOKEN_CARTOON);
+                    loadVideosByPlayListId(EN_PLAYLIST_ID_CARTOON, 0, EN_PAGETOKEN_CARTOON);
                 }
                 break;
             case Constants.tab_search:
-                if (VIDEOS_SEARCH.size()>300) return;
+                if (VIDEOS_SEARCH.size() > 300) return;
                 searchVideosByContent(searchKey);
 
                 break;
@@ -1256,7 +1349,7 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
         startActivityForResult(intent, RESULT_VIDEO_CAP);
     }
 
-    public void showGooglePlayServicesAvailabilityErrorDialog(
+  /*  public void showGooglePlayServicesAvailabilityErrorDialog(
             final int connectionStatusCode) {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -1267,11 +1360,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             }
         });
     }
+*/
 
     /**
      * Check that Google Play services APK is installed and up to date.
      */
-    private boolean checkGooglePlayServicesAvailable() {
+   /* private boolean checkGooglePlayServicesAvailable() {
         final int connectionStatusCode = GooglePlayServicesUtil
                 .isGooglePlayServicesAvailable(this);
         if (GooglePlayServicesUtil.isUserRecoverableError(connectionStatusCode)) {
@@ -1279,21 +1373,20 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             return false;
         }
         return true;
-    }
+    }*/
 
-    private void haveGooglePlayServices() {
+   /* private void haveGooglePlayServices() {
         // check if there is already an account selected
         if (credential.getSelectedAccountName() == null) {
             // ask user to choose account
             chooseAccount();
         }
-    }
+    }*/
 
-    private void chooseAccount() {
+   /* private void chooseAccount() {
         startActivityForResult(credential.newChooseAccountIntent(),
                 REQUEST_ACCOUNT_PICKER);
-    }
-
+    }*/
     @Override
     public void onFullscreen(boolean b) {
 
@@ -1322,7 +1415,12 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     @Override
     public void onVideoEnded() {
 
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        Boolean repeat = pre.getBoolean(PRE_REPEAT, false);
+        if (repeat)
+            mYouTubePlayer.play();
     }
+
 
     @Override
     public void onError(YouTubePlayer.ErrorReason errorReason) {
@@ -1330,14 +1428,28 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     }
 
     @Override
+    public void onDeleteItem(String videoId) {
+        try {
+            mDBManager.doDeleteRecordTable(videoId);
+            List<FavoriteData> favoritevideoDB = new ArrayList<FavoriteData>();
+            favoritevideoDB = mDBManager.loadallVideos();
+            listAdapter.setVideos(favoritevideoDB);
+            listAdapter.notifyDataSetChanged();
+        } catch (Exception ex) {
+            Log.d(TAG, "Fail to delete record");
+        }
+    }
+
+    @Override
     public void onVideoFavoriteSelected(FavoriteData video) {
         //mVideoData = video;
 
 
-        panToVideo(video.getVideoId(),video.getVideoName());
-     if (mDBManager.updatePosition(video)) {
+        panToVideo(video.getVideoId(), video.getVideoName());
+        if (mDBManager.updatePosition(video)) {
 
-     };
+        }
+        ;
 
         hideListVideo();
 
@@ -1346,19 +1458,23 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     @Override
     public void onSwitch(boolean status) {
         //
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
+        editPre.putBoolean(PRE_REPEAT, status);
+        editPre.commit();
     }
 
     @Override
     public void onChooseAccount() {
-        chooseAccount();
+        // chooseAccount();
     }
 
     @Override
     public void onChangeContent(String location) {
-        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-        SharedPreferences.Editor editPre=pre.edit();
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
         if (location.equals("VN"))
-        editPre.putString(PRE_LOCATION, "EN");
+            editPre.putString(PRE_LOCATION, "EN");
         else
             editPre.putString(PRE_LOCATION, "VN");
         editPre.commit();
@@ -1372,7 +1488,44 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
     @Override
     public void onRemoveAd() {
+       /* mHelper.launchPurchaseFlow(this, ITEM_SKU, 10001,
+                mPurchaseFinishedListener, "mypurchasetoken");*/
+    }
 
+   /* IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+            = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result,
+                                          Purchase purchase)
+        {
+            if (result.isFailure()) {
+                // Handle error
+                return;
+            }
+            else if (purchase.getSku().equals(ITEM_SKU)) {
+                consumeItem();
+                //buyButton.setEnabled(false);
+                disableRemoveAd();
+            }
+
+        }
+    };*/
+
+    public void disableRemoveAd() {
+
+        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+        SharedPreferences.Editor editPre = pre.edit();
+        editPre.putBoolean(Constants.PRE_REMOVE_AD, false);
+        editPre.commit();
+        if (mAdView != null)
+            mAdView.destroy();
+        listMenuAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+      /*  if (mHelper != null) mHelper.dispose();
+        mHelper = null;*/
     }
 
     /**
@@ -1427,18 +1580,18 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
     // return null;
     // }
 
-    private class UploadBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(REQUEST_AUTHORIZATION_INTENT)) {
-                Log.d(TAG, "Request auth received - executing the intent");
-                Intent toRun = intent
-                        .getParcelableExtra(REQUEST_AUTHORIZATION_INTENT_PARAM);
-                startActivityForResult(toRun, REQUEST_AUTHORIZATION);
-            }
-        }
-    }
-    class LocationAsynTask extends  AsyncTask <String , Void, Boolean> {
+    /* private class UploadBroadcastReceiver extends BroadcastReceiver {
+         @Override
+         public void onReceive(Context context, Intent intent) {
+             if (intent.getAction().equals(REQUEST_AUTHORIZATION_INTENT)) {
+                 Log.d(TAG, "Request auth received - executing the intent");
+                 Intent toRun = intent
+                         .getParcelableExtra(REQUEST_AUTHORIZATION_INTENT_PARAM);
+                 startActivityForResult(toRun, REQUEST_AUTHORIZATION);
+             }
+         }
+     }*/
+    class LocationAsynTask extends AsyncTask<String, Void, Boolean> {
 
 
         public LocationAsynTask() {
@@ -1468,8 +1621,8 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     String location = jsono.getString("geoplugin_countryCode");
                     if (location != null) {
 
-                        SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-                        SharedPreferences.Editor editPre=pre.edit();
+                        SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                        SharedPreferences.Editor editPre = pre.edit();
                         editPre.putString(PRE_LOCATION, location);
                         editPre.commit();
                         //refreshApp();
@@ -1540,9 +1693,13 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
 
             } catch (IOException e) {
+
                 e.printStackTrace();
             } catch (JSONException e) {
-
+                if (urls[0].equals(BaseURLStringDropBox_1))
+                    new JSONAsyncTask().execute(BaseURLStringGoogle);
+                else if (urls[0].equals(BaseURLStringGoogle))
+                    new JSONAsyncTask().execute(BaseURLStringGit);
                 e.printStackTrace();
             }
             return false;
@@ -1552,13 +1709,13 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
             if (result) {
 
                 try {
-                         JSONObject mObjectEN = myPlayLists_EN.getJSONObject(0);
-                        JSONObject mObjectVN = myPlayLists_VN.getJSONObject(0);
-                        EN_PLAYLIST_ID_MUSIC = mObjectEN.getString("playListId");
-                        VN_PLAYLIST_ID_MUSIC = mObjectVN.getString("playListId");
+                    JSONObject mObjectEN = myPlayLists_EN.getJSONObject(0);
+                    JSONObject mObjectVN = myPlayLists_VN.getJSONObject(0);
+                    EN_PLAYLIST_ID_MUSIC = mObjectEN.getString("playListId");
+                    VN_PLAYLIST_ID_MUSIC = mObjectVN.getString("playListId");
                     //
-                        mObjectEN = myPlayLists_EN.getJSONObject(1);
-                        mObjectVN = myPlayLists_VN.getJSONObject(1);
+                    mObjectEN = myPlayLists_EN.getJSONObject(1);
+                    mObjectVN = myPlayLists_VN.getJSONObject(1);
                     EN_PLAYLIST_ID_STORY = mObjectEN.getString("playListId");
                     VN_PLAYLIST_ID_STORY = mObjectVN.getString("playListId");
                     //
@@ -1570,10 +1727,10 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
                     mObjectEN = myPlayLists_EN.getJSONObject(3);
                     mObjectVN = myPlayLists_VN.getJSONObject(3);
                     VN_PLAYLIST_ID_FAVORITE = mObjectVN.getString("playListId");
-                    EN_PLAYLIST_ID_FAVORITE =  mObjectEN.getString("playListId");
+                    EN_PLAYLIST_ID_FAVORITE = mObjectEN.getString("playListId");
 
-                    SharedPreferences pre=getSharedPreferences("my_data", MODE_PRIVATE);
-                    SharedPreferences.Editor editPre=pre.edit();
+                    SharedPreferences pre = getSharedPreferences("my_data", MODE_PRIVATE);
+                    SharedPreferences.Editor editPre = pre.edit();
                     editPre.putInt(PRE_IN_TAB, Constants.tab_music);
                     editPre.commit();
                     refreshView();
@@ -1581,22 +1738,25 @@ public static final String  BaseURLStringGoogle ="https://drive.google.com/uc?ex
 
                     String location = pre.getString(PRE_LOCATION, "EN");
 
-                    boolean isFirstTimeApp = pre.getBoolean("isFirstTimeApp",false);
+                    boolean isFirstTimeApp = pre.getBoolean("isFirstTimeApp", false);
                     if (!isFirstTimeApp) {
                         if (location.equals("VN")) {
-                            loadVideosByPlayListId(VN_PLAYLIST_ID_FAVORITE, 1,"");
+                            loadVideosByPlayListId(VN_PLAYLIST_ID_FAVORITE, 1, "");
                             Log.d(TAG, "Load favorite VN");
                         } else {
-                            loadVideosByPlayListId(EN_PLAYLIST_ID_FAVORITE, 1,"");
+                            loadVideosByPlayListId(EN_PLAYLIST_ID_FAVORITE, 1, "");
                             Log.d(TAG, "Load favorite EN");
                         }
-                   editPre.putBoolean("isFirstTimeApp",true);
+                        editPre.putBoolean("isFirstTimeApp", true);
                     }
 
                 } catch (JSONException ex) {
 
-                    Log.d(TAG,"Load JSON  failed");
+                    Log.d(TAG, "Load JSON  failed");
                 }
+            } else {
+
             }
-        }}
+        }
+    }
 }

@@ -50,16 +50,18 @@ public class ListMenuAdapter extends BaseAdapter {
        listMenuItemName_EN.add("Remove Ad");
        listMenuItemName_EN.add("Content: English");
        listMenuItemName_EN.add("About");
+
        listMenuItemName_VN.add("Lặp");
        listMenuItemName_VN.add("Đăng Nhập");
        listMenuItemName_VN.add("Bỏ quảng cáo");
        listMenuItemName_VN.add("Nội dung:Tiếng Việt");
        listMenuItemName_VN.add("About");
 
+
    }
     @Override
     public int getCount() {
-        return 5;
+        return 3;
     }
 
     @Override
@@ -83,6 +85,8 @@ public class ListMenuAdapter extends BaseAdapter {
         ArrayList<String> mListItem = new ArrayList<String>();
         SharedPreferences pre= mContext.getSharedPreferences("my_data", mContext.MODE_PRIVATE);
          location = pre.getString(Constants.PRE_LOCATION, "EN");
+        boolean isRemovedAd = pre.getBoolean(Constants.PRE_REMOVE_AD, false);
+        //isRemovedAd = true;
         if (location.equals("VN")) {
             mListItem.addAll(listMenuItemName_VN);
 
@@ -103,7 +107,7 @@ public class ListMenuAdapter extends BaseAdapter {
 
 
                 break;
-            case 1:
+            /*case 1:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
                         .setText(mListItem.get(1));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
@@ -113,8 +117,11 @@ public class ListMenuAdapter extends BaseAdapter {
                         mCallback.onChooseAccount();
                     }
                 });
-                break;
-            case 2:
+                break;*/
+           /* case 2:
+
+
+
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
                         .setText(mListItem.get(2));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
@@ -124,8 +131,13 @@ public class ListMenuAdapter extends BaseAdapter {
                         mCallback.onRemoveAd();
                     }
                 });
-                break;
-            case 3:
+                if (isRemovedAd) {
+                    convertView.setEnabled(false);
+                    ((TextView) convertView.findViewById(R.id.txtView_menuitem_name)).setText("Purchased");
+                    ((TextView) convertView.findViewById(R.id.txtView_menuitem_name)).setEnabled(false);
+                }
+                    break;*/
+            case 1:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
                         .setText(mListItem.get(3));
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);
@@ -137,7 +149,7 @@ public class ListMenuAdapter extends BaseAdapter {
                 });
                 break;
 
-            case 4:
+            case 2:
                 ((TextView) convertView.findViewById(R.id.txtView_menuitem_name))
                         .setText("About");
                 ((Switch) convertView.findViewById(R.id.switch_replay)).setVisibility(View.GONE);

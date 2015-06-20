@@ -8,10 +8,10 @@
     <dimen name="detail_horiz_margin">16dp</dimen>
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="textview_video">14dp</dimen>
-    <dimen name="playerview_left">15dp</dimen>
+    <dimen name="textview_video">10dp</dimen>
+    <dimen name="playerview_left">10dp</dimen>
     <dimen name="playerview_top">12dp</dimen>
-    <dimen name="playerview_bottom">55dp</dimen>
-    <dimen name="text_menu_item_size">12dp</dimen>
+    <dimen name="playerview_bottom">10dp</dimen>
+    <dimen name="text_menu_item_size">8sp</dimen>
 
 </resources>

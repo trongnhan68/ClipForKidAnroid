@@ -33,4 +33,5 @@ public class Constants {
     public static final String PRE_IN_TAB = "IN_TAB";
     public static final String PRE_REGISTED = "REGISTED";
     public static final String PRE_LOCATION = "LOCATION";
+    public static final String PRE_REMOVE_AD = "IS_REMOVE_AD";
 }

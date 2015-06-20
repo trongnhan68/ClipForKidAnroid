@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -47,7 +48,7 @@ private int heightScreen;
         this.mVideos = videos;
     }
     public interface CallbackFavoriteView {
-
+        void onDeleteItem(String videoId);
         void onVideoFavoriteSelected(FavoriteData video);
 
     }
@@ -69,9 +70,22 @@ private int heightScreen;
     @Override
     public View getView(final int position, View convertView,
                         ViewGroup container) {
+        ViewHolderItem viewHolder;
+
         if (convertView == null) {
             convertView = LayoutInflater.from(mActivity).inflate(
                     R.layout.item_favorite, container, false);
+            viewHolder = new ViewHolderItem();
+            viewHolder.textViewDuration = (TextView) convertView.findViewById(R.id.txtView_videoDuratiion);
+            viewHolder.textViewVideoName = (TextView) convertView.findViewById(R.id.txtview_videoNameInItem);
+            viewHolder.thumbnail =  (ImageView) convertView.findViewById(R.id.thumbnail);
+            viewHolder.btnDelete = (ImageButton) convertView.findViewById(R.id.btn_delete);
+
+            convertView.setTag(viewHolder);
+        } else {
+
+            viewHolder = (ViewHolderItem) convertView.getTag();
+
         }
         try {
             final AbsListView.LayoutParams params = (AbsListView.LayoutParams) convertView.getLayoutParams();
@@ -80,15 +94,21 @@ private int heightScreen;
         }
 
         catch(Exception ex) {}
-        FavoriteData video = mVideos.get(position);
-        ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
-                .setText(video.getVideoName());
-//            mImageFetcher.loadImage(video.getThumbUri(),
-//                    (ImageView) convertView.findViewById(R.id.thumbnail));
-        mImageLoader.DisplayImage(video.getVideoUrl(),
-                (ImageView) convertView.findViewById(R.id.thumbnail));
+        final FavoriteData video = mVideos.get(position);
 
-        ((TextView) convertView.findViewById(R.id.txtView_videoDuratiion))
+        viewHolder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callback.onDeleteItem(video.getVideoId());
+            }
+        });
+        viewHolder.textViewVideoName
+                .setText(video.getVideoName());
+
+        mImageLoader.DisplayImage(video.getVideoUrl(),
+                viewHolder.thumbnail);
+
+        viewHolder.textViewDuration
                 .setText(Utils.timeHumanReadable(video.getVideoDuration()));
         convertView.findViewById(R.id.main_target).setOnClickListener(
                 new View.OnClickListener() {
@@ -100,4 +120,15 @@ private int heightScreen;
                 });
         return convertView;
     }
+
+    static class ViewHolderItem {
+
+        TextView textViewDuration;
+        TextView textViewVideoName;
+        ImageView thumbnail;
+        ImageButton btnDelete;
+
+    }
+
 }
+

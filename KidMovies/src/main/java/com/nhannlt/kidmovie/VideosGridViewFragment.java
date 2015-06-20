@@ -31,6 +31,7 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.GridLayout;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -113,7 +114,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         if (!isAdded()) {
             return;
         }
-
+ // if (videos == null) videos = new ArrayList<VideoData>();
         if (videoAdapter == null) {
              videoAdapter = new ListVideoAdapter(videos);
 
@@ -134,7 +135,8 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
             {
-                if(firstVisibleItem + visibleItemCount >= totalItemCount && !isLoading) {
+                if (videos != null)
+                if(firstVisibleItem + visibleItemCount >= totalItemCount && !isLoading && videos.size()>6) {
                     // End has been reached
                     Log.d("GridView scroll: ", "" + firstVisibleItem + " " + visibleItemCount + " " + totalItemCount);
                     isLoading = true;
@@ -259,7 +261,7 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
             if (videos != null)
 
             this.mVideos = videos;
-           else  mVideos.clear();
+           else  this.mVideos.clear();
         }
         @Override
         public int getCount() {
@@ -279,20 +281,27 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
         @Override
         public View getView(final int position, View convertView,
                             ViewGroup container) {
+            ViewHolderItem viewHolder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(getActivity()).inflate(
                         R.layout.list_item, container, false);
+                viewHolder = new ViewHolderItem();
+                viewHolder.textViewDuration = (TextView) convertView.findViewById(R.id.txtView_videoDuratiion);
+                viewHolder.textViewVideoName = (TextView) convertView.findViewById(R.id.txtview_videoNameInItem);
+                viewHolder.thumbnail =  (ImageView) convertView.findViewById(R.id.thumbnail);
+                convertView.setTag(viewHolder);
+            }else {
+
+                viewHolder = (ViewHolderItem) convertView.getTag();
+
             }
 
-
             VideoData video = mVideos.get(position);
-            ((TextView) convertView.findViewById(R.id.txtview_videoNameInItem))
+            viewHolder.textViewVideoName
                     .setText(video.getTitle());
-//            mImageFetcher.loadImage(video.getThumbUri(),
-//                    (ImageView) convertView.findViewById(R.id.thumbnail));
-            mImageLoader.DisplayImage(video.getThumbUri(),
-                    (ImageView) convertView.findViewById(R.id.thumbnail));
-            ((TextView) convertView.findViewById(R.id.txtView_videoDuratiion))
+
+            mImageLoader.DisplayImage(video.getThumbUri(),viewHolder.thumbnail);
+            viewHolder.textViewDuration
                     .setText(Utils.timeHumanReadable(video.getVideo().getContentDetails().getDuration()));
             try {
                 final AbsListView.LayoutParams params = (AbsListView.LayoutParams) convertView.getLayoutParams();
@@ -315,6 +324,14 @@ public class VideosGridViewFragment extends Fragment implements ConnectionCallba
                     });
             return convertView;
         }
+
+    }
+    static class ViewHolderItem {
+
+        TextView textViewDuration;
+        TextView textViewVideoName;
+        ImageView thumbnail;
+
 
     }
 }

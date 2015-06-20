@@ -1,13 +1,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg"
-    android:divider="?android:dividerHorizontal"
-    android:horizontalSpacing="10dp"
+
+
     android:orientation="horizontal"
-    android:showDividers="middle"
+
 
     android:verticalSpacing="10dp">
 
@@ -15,11 +15,10 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="7.7"
-        android:divider="?android:dividerHorizontal"
-        android:horizontalSpacing="10dp"
+
         android:orientation="vertical"
-        android:showDividers="middle"
-        android:verticalSpacing="10dp">
+
+     >
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -27,44 +26,77 @@
             android:layout_weight="1"
 
             >
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
 
-            <ImageView
+              >
+              <FrameLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
+                  >
 
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_gravity="center"
-                android:background="@drawable/television"
+                  <ImageView
 
-                />
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
 
+                      android:background="@drawable/tv_top"
+
+                      />
+                  <FrameLayout
+
+                      android:id="@+id/detail_container"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:paddingBottom="@dimen/playerview_bottom"
+                      android:paddingLeft="@dimen/playerview_left"
+                      android:paddingRight="@dimen/playerview_left"
+                      android:paddingTop="@dimen/playerview_top"
+                      />
+              </FrameLayout>
             <FrameLayout
-
-                android:id="@+id/detail_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:paddingBottom="@dimen/playerview_bottom"
+                android:layout_height="wrap_content"
+
+                >
+                <ImageView
+
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:background="@drawable/tv_bot"
+
+                    />
+                <RelativeLayout
+                    android:id="@+id/relative_ad"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="bottom"
+android:gravity="right"
+                    >
+
+                    <com.google.android.gms.ads.AdView
+                        android:id="@+id/adView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|right"
+                        ads:adSize="BANNER"
+                        ads:adUnitId="@string/banner_ad_unit_id"></com.google.android.gms.ads.AdView>
+
+                </RelativeLayout>
+            </FrameLayout>
+
+          </LinearLayout>
+
+
+           <!-- android:paddingBottom="@dimen/playerview_bottom"
                 android:paddingLeft="@dimen/playerview_left"
                 android:paddingRight="@dimen/playerview_left"
-                android:paddingTop="@dimen/playerview_top" />
-           <RelativeLayout
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:paddingLeft="@dimen/playerview_left"
-               android:paddingTop="@dimen/playerview_top"
-               >
-               <com.google.android.gms.ads.AdView
-                   android:id="@+id/adView"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_centerHorizontal="true"
+                android:paddingTop="@dimen/playerview_top"-->
 
-                   android:layout_alignParentTop="true"
-                   ads:adSize="BANNER"
-                   ads:adUnitId="@string/banner_ad_unit_id">
-               </com.google.android.gms.ads.AdView>
-
-           </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/linear_listVideos"
@@ -73,46 +105,48 @@
                 android:orientation="vertical">
 
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:background="@android:color/black"
+
+                    android:orientation="horizontal">
+
+                    <SearchView
+                        android:id="@+id/searchView"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
 
-                        android:background="@android:color/black"
-                        android:gravity="left"
-                        android:orientation="horizontal">
-                        <SearchView
-                            android:id="@+id/searchView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:background="@android:color/black" />
 
-                            android:background="@android:color/black"
-                            android:layout_marginRight="40dp"
-                            />
-                        <ImageButton
-                            android:id="@+id/btn_music"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/en_music"
+                    <ImageButton
+                        android:id="@+id/btn_music"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/en_music"
+                        android:layout_gravity="center"
 
-                            ></ImageButton>
+                        ></ImageButton>
 
-                        <ImageButton
-                            android:id="@+id/btn_funny"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/en_story_select"
+                    <ImageButton
+                        android:id="@+id/btn_funny"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/en_story_select"
 
-                            ></ImageButton>
+                        ></ImageButton>
 
-                        <ImageButton
-                            android:id="@+id/btn_cartoon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/en_cartoon"
+                    <ImageButton
+                        android:id="@+id/btn_cartoon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/en_cartoon"
 
-                            ></ImageButton>
-                    </LinearLayout>
-
+                        ></ImageButton>
+                </LinearLayout>
 
 
                 <FrameLayout
@@ -125,14 +159,14 @@
                         android:name="com.nhannlt.kidmovie.VideosGridViewFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        tools:layout="@layout/list_fragment">
-                    </fragment>
-
+                        tools:layout="@layout/list_fragment"></fragment>
 
 
                 </FrameLayout>
 
             </LinearLayout>
+
+
 
 
         </FrameLayout>
@@ -184,58 +218,57 @@
             />
         </LinearLayout>
     </LinearLayout>
-<FrameLayout
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="2.3">
 
-
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_weight="2.3">
 
-        android:orientation="vertical">
 
-        <ImageButton
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+
+            android:orientation="vertical">
+
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/favorite" />
+
+            <ListView
+                android:id="@+id/listview_favorite"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearMenu"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/favorite" />
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/listview_favorite"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-             />
-
-    </LinearLayout>
-   <LinearLayout
-       android:id="@+id/linearMenu"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:orientation="vertical"
-       android:background="@android:color/black"
-       >
-       <TextView
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="MENU"
-           android:textSize="30dp"
-         android:textColor="@android:color/white"
-           android:gravity="center_horizontal"
-           android:textStyle="bold"
-           />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="MENU"
+                android:textColor="@android:color/white"
+                android:textSize="30dp"
+                android:textStyle="bold" />
 
 
-    <ListView
-        android:id="@+id/listView_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:background="@android:color/black"
-        >
+            <ListView
+                android:id="@+id/listView_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@android:color/black">
 
 
-    </ListView>
-   </LinearLayout>
-</FrameLayout>
+            </ListView>
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

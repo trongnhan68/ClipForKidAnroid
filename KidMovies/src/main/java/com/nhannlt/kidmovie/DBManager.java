@@ -65,14 +65,17 @@ public class DBManager {
       }
     }
 
-    public void doDeleteRecordTable(String videoId) {
+    public boolean doDeleteRecordTable(String videoId) {
+       int result=-1;
         if (videoId != null) {
-            database.delete("tblFavorite", null, null);
+         //   result =   database.delete("tblFavorite", null, null);
 
-            database.delete("tblFavorite",
+           result = database.delete("tblFavorite",
                     "videoId=?",
                     new String[]{videoId});
         }
+         if (result == -1) return false;
+        else return true;
     }
     public FavoriteData loadVideoByID(String videoId) {
         Cursor c = database.query("tblFavorite",
